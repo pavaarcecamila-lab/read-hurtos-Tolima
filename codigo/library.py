@@ -1,6 +1,17 @@
 import pandas as pd
 from pathlib import Path
 import unicodedata
+import warnings
+
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import (
+    KBinsDiscretizer,
+    MinMaxScaler,
+    RobustScaler,
+    StandardScaler,
+    OrdinalEncoder
+)
+
 # ============================================================
 # FUNCIONES GENERALES
 # ============================================================
@@ -800,3 +811,154 @@ class ValidadorDatos:
         }
 
         return resultado
+
+
+# ============================================================
+# TRANSFORMACIÓN Y REDUCCIÓN DE DIMENSIONALIDAD
+# ============================================================
+
+class TransformadorDatos:
+
+    def __init__(self, df, numericas=None, categoricas=None):
+        self.df = df.copy()
+        if numericas is None:
+            self.numericas = [
+                "AÑO",
+                "VEHICULOS_REGISTRADOS",
+                "VEHICULOS_HURTADOS",
+                "VEHICULOS_RECUPERADOS"
+            ]
+        else:
+            self.numericas = numericas
+
+        if categoricas is None:
+            self.categoricas = ["TIPO_VEHICULO", "DEPARTAMENTO"]
+        else:
+            self.categoricas = categoricas
+
+    @staticmethod
+    def distancia(a, b):
+        return ((a - b) ** 2).sum() ** 0.5
+
+    def demo_distancias(self):
+        c1, c2 = self.df[self.numericas].iloc[0], self.df[self.numericas].iloc[1]
+        dist_sin = self.distancia(c1, c2)
+        X_minmax = pd.DataFrame(
+            MinMaxScaler().fit_transform(self.df[self.numericas]),
+            columns=self.numericas
+        )
+        c1e, c2e = X_minmax.iloc[0], X_minmax.iloc[1]
+        dist_minmax = self.distancia(c1e, c2e)
+        return {
+            "distancia_sin_escalar": round(float(dist_sin), 3),
+            "distancia_minmax": round(float(dist_minmax), 3),
+            "c1_sin": c1.to_dict(),
+            "c2_sin": c2.to_dict()
+        }
+
+    def escalar(self):
+        X = self.df[self.numericas]
+        df_minmax = pd.DataFrame(
+            MinMaxScaler().fit_transform(X),
+            columns=[f"{c}_minmax" for c in self.numericas]
+        )
+        df_std = pd.DataFrame(
+            StandardScaler().fit_transform(X),
+            columns=[f"{c}_std" for c in self.numericas]
+        )
+        df_rob = pd.DataFrame(
+            RobustScaler().fit_transform(X),
+            columns=[f"{c}_rob" for c in self.numericas]
+        )
+        return df_minmax, df_std, df_rob
+
+    def codificar_onehot(self):
+        return pd.get_dummies(
+            self.df[self.categoricas],
+            prefix=self.categoricas,
+            dtype=int
+        )
+
+    def codificar_ordinal(self, columnas_ordenadas=None):
+        df_ord = pd.DataFrame(index=self.df.index)
+        if columnas_ordenadas is None:
+            if "TIPO_VEHICULO" in self.df.columns:
+                categorias_tipo = [["MOTOCICLETA", "AUTOMOTOR"]]
+                enc = OrdinalEncoder(categories=categorias_tipo)
+                df_ord["TIPO_VEHICULO_ORDINAL"] = enc.fit_transform(
+                    self.df[["TIPO_VEHICULO"]]
+                ).ravel().astype(int)
+        return df_ord
+
+    def discretizar(self, columna="AÑO", n_bins=4):
+        try:
+            discretizador = KBinsDiscretizer(
+                n_bins=n_bins,
+                encode="ordinal",
+                strategy="quantile"
+            )
+            bins = discretizador.fit_transform(self.df[[columna]]).ravel()
+            bordes = discretizador.bin_edges_[0].round(0)
+        except Exception:
+            discretizador = KBinsDiscretizer(
+                n_bins=n_bins,
+                encode="ordinal",
+                strategy="uniform"
+            )
+            bins = discretizador.fit_transform(self.df[[columna]]).ravel()
+            bordes = discretizador.bin_edges_[0].round(0)
+        
+        return pd.Series(bins, name=f"{columna}_BIN_ORDINAL", index=self.df.index), bordes
+
+    def aplicar_pca(self, df_estandarizado=None):
+        if df_estandarizado is None:
+            X_std = StandardScaler().fit_transform(self.df[self.numericas])
+        else:
+            X_std = df_estandarizado.values
+
+        pca = PCA()
+        componentes = pca.fit_transform(X_std)
+        razones = pca.explained_variance_ratio_
+        acumulada = razones.cumsum()
+
+        para_80 = int((acumulada < 0.80).sum()) + 1
+        para_90 = int((acumulada < 0.90).sum()) + 1
+
+        n_comp = min(len(self.numericas), componentes.shape[1])
+        cols_pca = [f"PCA_{i+1}" for i in range(n_comp)]
+        df_pca = pd.DataFrame(componentes[:, :n_comp], columns=cols_pca, index=self.df.index)
+
+        resumen = {
+            "varianza_explicada": razones.round(4).tolist(),
+            "varianza_acumulada": acumulada.round(4).tolist(),
+            "componentes_para_80": para_80,
+            "componentes_para_90": para_90
+        }
+        return df_pca, resumen
+
+    def construir_matriz_final(self):
+        df_minmax, df_std, df_rob = self.escalar()
+        df_onehot = self.codificar_onehot()
+        df_ordinal = self.codificar_ordinal()
+        s_bin_anio, _ = self.discretizar("AÑO", n_bins=4)
+        s_bin_reg, _ = self.discretizar("VEHICULOS_REGISTRADOS", n_bins=4)
+        df_pca, resumen_pca = self.aplicar_pca(
+            pd.DataFrame(
+                StandardScaler().fit_transform(self.df[self.numericas]),
+                columns=self.numericas
+            )
+        )
+
+        X_final = pd.concat(
+            [
+                self.df[["AÑO", "CODIGO_DANE_MUNICIPIO", "DEPARTAMENTO", "MUNICIPIO"]],
+                df_std,
+                df_onehot,
+                df_ordinal,
+                s_bin_anio,
+                s_bin_reg,
+                df_pca
+            ],
+            axis=1
+        )
+        return X_final, resumen_pca

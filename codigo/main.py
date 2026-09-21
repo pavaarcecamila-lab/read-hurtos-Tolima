@@ -10,6 +10,7 @@ from library import (
     IntegradorDatos,
     ValidadorDatos,
     AnalizadorAtipicos,
+    TransformadorDatos,
     normalizar_texto
 )
 
@@ -789,6 +790,25 @@ def main():
         print("Límite inferior:", resultado["LIMITE_INFERIOR"])
         print("Límite superior:", resultado["LIMITE_SUPERIOR"])
         print("Valores atípicos:", resultado["VALORES_ATIPICOS"])
+
+    print("\n" + "=" * 60)
+    print("10. TRANSFORMACIÓN Y REDUCCIÓN DE DIMENSIONALIDAD (PCA)")
+    print("=" * 60)
+
+    transformador = TransformadorDatos(df_final)
+    matriz_final, resumen_pca = transformador.construir_matriz_final()
+
+    ruta_matriz_features = CARPETA_RESULTADOS / "matriz_features_final.csv"
+    matriz_final.to_csv(ruta_matriz_features, index=False, encoding="utf-8-sig")
+
+    print(f"Matriz de features generada: {matriz_final.shape}")
+    print(f"Guardada en: {ruta_matriz_features}")
+    print("\nResumen PCA:")
+    print(f"- Varianza explicada por componentes: {resumen_pca['varianza_explicada']}")
+    print(f"- Componentes para >=80% varianza: {resumen_pca['componentes_para_80']}")
+    print(f"- Componentes para >=90% varianza: {resumen_pca['componentes_para_90']}")
+
+
 
 
 # ============================================================
