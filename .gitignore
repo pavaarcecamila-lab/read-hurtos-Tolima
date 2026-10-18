@@ -1,0 +1,26 @@
+# Entornos virtuales
+.venv/
+env/
+venv/
+ENV/
+
+# Python cache y compilados
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Sistema Operativo
+.DS_Store
+Thumbs.db
+
+# Temporales de IDE
+.vscode/
+.idea/
+
+# Scratch temporal
+scratch/
+*.tmp
