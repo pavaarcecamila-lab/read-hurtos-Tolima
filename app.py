@@ -33,16 +33,28 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, recall_score, f1_score, confusion_matrix
 
-from src.ui_templates import (
-    cargar_estilos_css,
-    render_hero_banner,
-    render_context_box,
-    render_kpi_card,
-    render_model_card,
-    render_cluster_kpi,
-    render_alert_card,
-    render_sidebar_authors
-)
+try:
+    from ui_templates import (
+        cargar_estilos_css,
+        render_hero_banner,
+        render_context_box,
+        render_kpi_card,
+        render_model_card,
+        render_cluster_kpi,
+        render_alert_card,
+        render_sidebar_authors
+    )
+except ImportError:
+    from src.ui_templates import (
+        cargar_estilos_css,
+        render_hero_banner,
+        render_context_box,
+        render_kpi_card,
+        render_model_card,
+        render_cluster_kpi,
+        render_alert_card,
+        render_sidebar_authors
+    )
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURACIÓN DE PÁGINA Y ESTILO ESTÉTICO PROFESIONAL
