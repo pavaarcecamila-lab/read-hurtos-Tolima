@@ -3,6 +3,7 @@
 env/
 venv/
 ENV/
+.local_python/
 
 # Python cache y compilados
 __pycache__/
@@ -13,9 +14,10 @@ __pycache__/
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
-# Sistema Operativo
+# Sistema Operativo y Office
 .DS_Store
 Thumbs.db
+~$*
 
 # Temporales de IDE
 .vscode/
