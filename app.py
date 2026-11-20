@@ -403,23 +403,16 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
     
-    seccion = st.radio(
-        "MÓDULOS DE ANÁLISIS",
-        [
-            "📊 Diagnóstico & Contexto Estratégico",
-            "🌲 Clasificación Supervisada (Árbol, KNN, Bayes)",
-            "🎯 Segmentación Territorial (K-Means & Jerárquico)",
-            "🔍 Ficha Táctica Municipal",
-            "📑 Conclusiones & Recomendaciones"
-        ]
-    )
-    
-    st.markdown("<hr style='margin: 18px 0; border: none; border-top: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
     st.markdown("<div style='font-size: 0.78rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 8px;'>Filtros de Exploración</div>", unsafe_allow_html=True)
     
     deps_disponibles = sorted(df_raw["DEPARTAMENTO"].dropna().unique().tolist())
     def_dep = ["TOLIMA"] if "TOLIMA" in deps_disponibles else [deps_disponibles[0]]
     dep_sel = st.multiselect("Departamento:", options=["TODOS"] + deps_disponibles, default=def_dep)
+    
+    # Filtro dinámico de Municipio / Ciudad en el panel lateral
+    deps_activos = df_raw["DEPARTAMENTO"].unique().tolist() if ("TODOS" in dep_sel or len(dep_sel) == 0) else dep_sel
+    munis_en_dep = sorted(df_raw[df_raw["DEPARTAMENTO"].isin(deps_activos)]["MUNICIPIO"].dropna().unique().tolist())
+    muni_filtro = st.selectbox("Municipio / Ciudad (Filtro Global):", ["TODOS"] + munis_en_dep, index=0)
     
     anio_max = int(df_raw["AÑO"].max())
     rango_anios = st.slider("Rango de Años:", min_value=2010, max_value=anio_max, value=(2010, anio_max))
@@ -444,6 +437,8 @@ with st.sidebar:
 df_filtrado = df_raw.copy()
 if "TODOS" not in dep_sel and len(dep_sel) > 0:
     df_filtrado = df_filtrado[df_filtrado["DEPARTAMENTO"].isin(dep_sel)]
+if muni_filtro != "TODOS":
+    df_filtrado = df_filtrado[df_filtrado["MUNICIPIO"] == muni_filtro]
 df_filtrado = df_filtrado[(df_filtrado["AÑO"] >= rango_anios[0]) & (df_filtrado["AÑO"] <= rango_anios[1])]
 if tipo_sel != "TODOS":
     df_filtrado = df_filtrado[df_filtrado["TIPO_VEHICULO"] == tipo_sel]
@@ -466,9 +461,27 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
+# BARRA DE NAVEGACIÓN SUPERIOR (ACCESIBLE SIEMPRE, CON O SIN SIDEBAR)
+# ─────────────────────────────────────────────────────────────────────────────
+seccion = st.radio(
+    "Navegación entre Módulos:",
+    [
+        "📊 Diagnóstico & Contexto Estratégico",
+        "🌲 Clasificación Supervisada (Árbol, KNN, Bayes)",
+        "🎯 Segmentación Territorial (K-Means & Jerárquico)",
+        "🔍 Ficha Táctica Municipal (Seleccionar Ciudad)",
+        "📑 Conclusiones & Recomendaciones"
+    ],
+    horizontal=True,
+    index=0
+)
+
+st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────────────────────────────────────
 # SECCIÓN 1: DIAGNÓSTICO & CONTEXTO ESTRATÉGICO
 # ─────────────────────────────────────────────────────────────────────────────
-if seccion == "📊 Diagnóstico & Contexto Estratégico":
+if "📊 Diagnóstico" in seccion:
     
     # Tarjeta de Contexto de la Presentación
     st.markdown("""
@@ -536,7 +549,9 @@ if seccion == "📊 Diagnóstico & Contexto Estratégico":
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+    st.info("💡 **¿Desea explorar la ficha táctica de una ciudad específica?** Seleccione arriba el botón **'🔍 Ficha Táctica Municipal (Seleccionar Ciudad)'** o utilice el filtro del panel lateral izquierdo.")
+
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
     
     c_left, c_right = st.columns([1.6, 1])
     with c_left:
@@ -620,7 +635,7 @@ if seccion == "📊 Diagnóstico & Contexto Estratégico":
 # ─────────────────────────────────────────────────────────────────────────────
 # SECCIÓN 2: CLASIFICACIÓN SUPERVISADA (ÁRBOL, KNN, BAYES)
 # ─────────────────────────────────────────────────────────────────────────────
-elif seccion == "🌲 Clasificación Supervisada (Árbol, KNN, Bayes)":
+elif "🌲 Clasificación" in seccion:
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #0F172A; margin:0 0 6px 0; font-size: 1.6rem;">Torneo de Clasificación Supervisada</h2>
@@ -758,7 +773,7 @@ elif seccion == "🌲 Clasificación Supervisada (Árbol, KNN, Bayes)":
 # ─────────────────────────────────────────────────────────────────────────────
 # SECCIÓN 3: SEGMENTACIÓN TERRITORIAL (CLUSTERING)
 # ─────────────────────────────────────────────────────────────────────────────
-elif seccion == "🎯 Segmentación Territorial (K-Means & Jerárquico)":
+elif "🎯 Segmentación" in seccion:
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #0F172A; margin:0 0 6px 0; font-size: 1.6rem;">Segmentación Territorial No Supervisada</h2>
@@ -822,7 +837,9 @@ elif seccion == "🎯 Segmentación Territorial (K-Means & Jerárquico)":
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+    st.info("💡 **¿Desea explorar la ficha táctica de una ciudad específica?** Seleccione arriba el botón **'🔍 Ficha Táctica Municipal (Seleccionar Ciudad)'** o utilice el filtro del panel lateral izquierdo.")
+
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
     
     # Gráfico de dispersión
     st.markdown("<div class='section-card'>", unsafe_allow_html=True)
@@ -857,10 +874,10 @@ elif seccion == "🎯 Segmentación Territorial (K-Means & Jerárquico)":
 # ─────────────────────────────────────────────────────────────────────────────
 # SECCIÓN 4: FICHA TÁCTICA MUNICIPAL
 # ─────────────────────────────────────────────────────────────────────────────
-elif seccion == "🔍 Ficha Táctica Municipal":
+elif "🔍 Ficha Táctica" in seccion:
     st.markdown("""
     <div style="margin-bottom: 20px;">
-        <h2 style="color: #0F172A; margin:0 0 6px 0; font-size: 1.6rem;">Ficha Táctica por Municipio</h2>
+        <h2 style="color: #0F172A; margin:0 0 6px 0; font-size: 1.6rem;">🔍 Ficha Táctica por Ciudad / Municipio</h2>
         <p style="color: #64748B; margin:0; font-size: 0.95rem;">
             Consulta individualizada para toma de decisiones y planeación policial territorial.
         </p>
@@ -869,7 +886,7 @@ elif seccion == "🔍 Ficha Táctica Municipal":
     
     municipios = sorted(df_clustered["MUNICIPIO"].dropna().unique().tolist())
     def_idx = municipios.index("IBAGUE") if "IBAGUE" in municipios else 0
-    m_sel = st.selectbox("Seleccione Municipio para Exploración:", municipios, index=def_idx)
+    m_sel = st.selectbox("🏙️ Seleccione la Ciudad o Municipio para Exploración:", municipios, index=def_idx)
     
     df_m = df_clustered[df_clustered["MUNICIPIO"] == m_sel]
     if len(df_m) > 0:
@@ -902,7 +919,7 @@ elif seccion == "🔍 Ficha Táctica Municipal":
 # ─────────────────────────────────────────────────────────────────────────────
 # SECCIÓN 5: CONCLUSIONES & SÍNTESIS TÉCNICA
 # ─────────────────────────────────────────────────────────────────────────────
-elif seccion == "📑 Conclusiones & Recomendaciones":
+elif "📑 Conclusiones" in seccion:
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #0F172A; margin:0 0 6px 0; font-size: 1.6rem;">Conclusiones de la Investigación & Recomendaciones para Autoridades</h2>
