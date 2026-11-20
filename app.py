@@ -33,6 +33,17 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, recall_score, f1_score, confusion_matrix
 
+from src.ui_templates import (
+    cargar_estilos_css,
+    render_hero_banner,
+    render_context_box,
+    render_kpi_card,
+    render_model_card,
+    render_cluster_kpi,
+    render_alert_card,
+    render_sidebar_authors
+)
+
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURACIÓN DE PÁGINA Y ESTILO ESTÉTICO PROFESIONAL
 # ─────────────────────────────────────────────────────────────────────────────
@@ -43,238 +54,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Ocultar menú de 3 puntos, botón Deploy y footer de Streamlit
-st.markdown("""
-<style>
-    /* Ocultar elementos de interfaz innecesarios sin romper el controlador del menú lateral */
-    #MainMenu {visibility: hidden !important; display: none !important;}
-    footer {visibility: hidden !important; display: none !important;}
-    .stDeployButton {display: none !important; visibility: hidden !important;}
-    div[data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-    div[data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
-    div[data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
-
-    /* Asegurar que el header sea transparente para permitir ver el botón del sidebar */
-    header[data-testid="stHeader"] {
-        background-color: transparent !important;
-        z-index: 99 !important;
-    }
-
-    /* Asegurar que el botón para desplegar/contraer el controlador lateral SIEMPRE esté visible */
-    button[data-testid="stSidebarCollapsedControl"],
-    div[data-testid="collapsedControl"],
-    div[data-testid="stSidebarCollapsedControl"],
-    button[kind="header"] {
-        visibility: visible !important;
-        display: flex !important;
-        opacity: 1 !important;
-        z-index: 999999 !important;
-        background-color: #0A192F !important;
-        color: #FFFFFF !important;
-        border-radius: 8px !important;
-    }
-    div[data-testid="collapsedControl"] svg,
-    button[data-testid="stSidebarCollapsedControl"] svg {
-        fill: #FFFFFF !important;
-        stroke: #FFFFFF !important;
-    }
-
-    /* Tipografía y contenedor principal */
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    
-    html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-
-    /* Fondo general */
-    .stApp {
-        background-color: #F8FAFC;
-    }
-
-    /* Banner Principal de Lujo */
-    .hero-banner {
-        background: linear-gradient(135deg, #0A192F 0%, #172A45 50%, #1E3A5F 100%);
-        border-radius: 18px;
-        padding: 30px 36px;
-        color: #F8FAFC;
-        margin-bottom: 22px;
-        box-shadow: 0 10px 30px -10px rgba(10, 25, 47, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        position: relative;
-        overflow: hidden;
-    }
-    .hero-banner::after {
-        content: "";
-        position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 320px;
-        height: 320px;
-        background: radial-gradient(circle, rgba(14, 165, 233, 0.16) 0%, transparent 70%);
-        border-radius: 50%;
-    }
-    .hero-title {
-        font-size: 2.1rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        margin: 0;
-        background: linear-gradient(90deg, #FFFFFF, #E2E8F0);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .hero-subtitle {
-        font-size: 1.05rem;
-        color: #94A3B8;
-        margin-top: 6px;
-        margin-bottom: 16px;
-        font-weight: 500;
-    }
-    .meta-chip {
-        display: inline-flex;
-        align-items: center;
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(8px);
-        padding: 5px 14px;
-        border-radius: 20px;
-        font-size: 0.82rem;
-        color: #CBD5E1;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        margin-right: 8px;
-        margin-bottom: 4px;
-    }
-    .meta-chip b {
-        color: #38BDF8;
-        margin-left: 4px;
-    }
-
-    /* Caja de Contexto Académico */
-    .context-box {
-        background: #FFFFFF;
-        border-radius: 16px;
-        padding: 24px 28px;
-        border: 1px solid #E2E8F0;
-        border-left: 6px solid #0EA5E9;
-        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
-        margin-bottom: 24px;
-    }
-    .context-header {
-        font-size: 1.15rem;
-        font-weight: 800;
-        color: #0F172A;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 10px;
-    }
-    .context-p {
-        font-size: 0.92rem;
-        color: #475569;
-        line-height: 1.6;
-        margin: 0 0 12px 0;
-    }
-    .context-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 14px;
-        margin-top: 14px;
-    }
-    .context-item {
-        background: #F8FAFC;
-        padding: 12px 16px;
-        border-radius: 10px;
-        border: 1px solid #E2E8F0;
-        font-size: 0.85rem;
-        color: #334155;
-    }
-    .context-item b {
-        color: #0F172A;
-        display: block;
-        margin-bottom: 3px;
-        font-size: 0.88rem;
-    }
-
-    /* Tarjetas KPI Estéticas */
-    .kpi-card {
-        background: #FFFFFF;
-        border-radius: 16px;
-        padding: 22px 24px;
-        border: 1px solid #E2E8F0;
-        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        height: 100%;
-        position: relative;
-    }
-    .kpi-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
-    }
-    .kpi-label {
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #64748B;
-        margin-bottom: 8px;
-    }
-    .kpi-number {
-        font-size: 2.1rem;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        color: #0F172A;
-        line-height: 1.1;
-    }
-    .kpi-sub {
-        font-size: 0.8rem;
-        font-weight: 600;
-        margin-top: 8px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    /* Píldoras de estado */
-    .pill-win {
-        background: #ECFDF5;
-        color: #047857;
-        padding: 4px 12px;
-        border-radius: 14px;
-        font-size: 0.78rem;
-        font-weight: 700;
-        border: 1px solid #A7F3D0;
-        display: inline-block;
-    }
-    .pill-runner {
-        background: #EFF6FF;
-        color: #1D4ED8;
-        padding: 4px 12px;
-        border-radius: 14px;
-        font-size: 0.78rem;
-        font-weight: 700;
-        border: 1px solid #BFDBFE;
-        display: inline-block;
-    }
-    .pill-fail {
-        background: #FFF1F2;
-        color: #BE123C;
-        padding: 4px 12px;
-        border-radius: 14px;
-        font-size: 0.78rem;
-        font-weight: 700;
-        border: 1px solid #FECDD3;
-        display: inline-block;
-    }
-
-    /* Contenedor de sección */
-    .section-card {
-        background: #FFFFFF;
-        border-radius: 16px;
-        padding: 24px;
-        border: 1px solid #E2E8F0;
-        box-shadow: 0 4px 20px -2px rgba(0,0,0,0.03);
-        margin-bottom: 20px;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Inyección de estilos desacoplados (static/css/styles.css)
+cargar_estilos_css()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CARGA Y CACHÉ DE DATOS
@@ -421,17 +202,7 @@ with st.sidebar:
     tipo_sel = st.selectbox("Tipo de Vehículo:", tipos_veh, index=0)
     
     st.markdown("<hr style='margin: 18px 0; border: none; border-top: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
-    st.markdown("""
-    <div style="font-size: 0.78rem; color: #64748B; line-height: 1.45;">
-        <b>Autoras:</b><br>
-        • Natalia Valencia<br>
-        • Camila Pava<br><br>
-        <b>Docente:</b><br>
-        Esteban Ernesto Morales Castro<br><br>
-        <b>Institución:</b><br>
-        UNIMINUTO Ibagué · 2026-2
-    </div>
-    """, unsafe_allow_html=True)
+    render_sidebar_authors()
 
 # Filtro en caliente
 df_filtrado = df_raw.copy()
@@ -446,19 +217,13 @@ if tipo_sel != "TODOS":
 # ─────────────────────────────────────────────────────────────────────────────
 # BANNER PRINCIPAL (HERO)
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="hero-banner">
-    <h1 class="hero-title">Observatorio de Inteligencia y Minería de Datos</h1>
-    <div class="hero-subtitle">
-        Análisis Predictivo del Hurto Vehicular y Capacidad de Recuperación Policial en Colombia
-    </div>
-    <div>
-        <span class="meta-chip">👥 Autoras: <b>Natalia Valencia & Camila Pava</b></span>
-        <span class="meta-chip">👨‍🏫 Docente: <b>Esteban Ernesto Morales Castro</b></span>
-        <span class="meta-chip">🏛️ <b>UNIMINUTO Ibagué · 2026-2</b></span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+render_hero_banner(
+    titulo="Observatorio de Inteligencia y Minería de Datos",
+    subtitulo="Análisis Predictivo del Hurto Vehicular y Capacidad de Recuperación Policial en Colombia",
+    autoras="Natalia Valencia & Camila Pava",
+    docente="Esteban Ernesto Morales Castro",
+    institucion="UNIMINUTO Ibagué · 2026-2"
+)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # BARRA DE NAVEGACIÓN SUPERIOR (ACCESIBLE SIEMPRE, CON O SIN SIDEBAR)
@@ -483,31 +248,8 @@ st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 # ─────────────────────────────────────────────────────────────────────────────
 if "📊 Diagnóstico" in seccion:
     
-    # Tarjeta de Contexto de la Presentación
-    st.markdown("""
-    <div class="context-box">
-        <div class="context-header">
-            <span>🎯</span> Contexto Estratégico y Propósito del Proyecto
-        </div>
-        <p class="context-p">
-            El hurto de automotores y motocicletas representa uno de los fenómenos delictivos con mayor impacto económico y de percepción de seguridad ciudadana en Colombia. Esta investigación aplica <b>técnicas avanzadas de Minería de Datos</b> (modelos predictivos supervisados y segmentación no supervisada) sobre un registro histórico integrado de <b>54,428 observaciones municipales</b>, analizando la correlación entre el crecimiento del parque automotor, los incidentes de hurto y la efectividad operativa de recuperación por parte de la Policía Nacional, con especial énfasis en el <b>departamento del Tolima</b>.
-        </p>
-        <div class="context-grid">
-            <div class="context-item">
-                <b>📌 Pregunta de Investigación Central</b>
-                <i>¿De qué manera la tipología vehicular y la escala del parque automotor registrado en los municipios colombianos condicionan la incidencia del hurto, y cuál es la efectividad real de la capacidad policial de recuperación frente a la hiperconcentración del delito en áreas metropolitanas?</i>
-            </div>
-            <div class="context-item">
-                <b>🌲 Dimensión Supervisada (Clasificación)</b>
-                Torneo algorítmico entre Árbol de Decisión, KNN y Naive Bayes para anticipar en milisegundos si un municipio entrará en condición de hurto activo.
-            </div>
-            <div class="context-item">
-                <b>🎯 Dimensión No Supervisada (Clustering)</b>
-                Segmentación con K-Means (k=4) y Dendrograma Jerárquico para aislar el <b>FOCO CRÍTICO</b> donde el hurto es masivo y la recuperación es deficiente.
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Tarjeta de Contexto Académico
+    render_context_box()
 
     # Tarjetas KPI Principales
     total_h = int(df_filtrado["VEHICULOS_HURTADOS"].sum())
@@ -517,37 +259,13 @@ if "📊 Diagnóstico" in seccion:
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown(f"""
-        <div class="kpi-card" style="border-top: 4px solid #F43F5E;">
-            <div class="kpi-label">Vehículos Hurtados</div>
-            <div class="kpi-number" style="color: #E11D48;">{total_h:,}</div>
-            <div class="kpi-sub" style="color: #E11D48;">Casos en filtro seleccionado</div>
-        </div>
-        """, unsafe_allow_html=True)
+        render_kpi_card("Vehículos Hurtados", f"{total_h:,}", "Casos en filtro seleccionado", "#F43F5E", "#E11D48", "#E11D48")
     with col2:
-        st.markdown(f"""
-        <div class="kpi-card" style="border-top: 4px solid #10B981;">
-            <div class="kpi-label">Vehículos Recuperados</div>
-            <div class="kpi-number" style="color: #059669;">{total_r:,}</div>
-            <div class="kpi-sub" style="color: #059669;">Efectividad policial registrada</div>
-        </div>
-        """, unsafe_allow_html=True)
+        render_kpi_card("Vehículos Recuperados", f"{total_r:,}", "Efectividad policial registrada", "#10B981", "#059669", "#059669")
     with col3:
-        st.markdown(f"""
-        <div class="kpi-card" style="border-top: 4px solid #0EA5E9;">
-            <div class="kpi-label">Tasa de Recuperación</div>
-            <div class="kpi-number" style="color: #0284C7;">{tasa_g:.1f}%</div>
-            <div class="kpi-sub" style="color: #64748B;">Recuperados vs Hurtados</div>
-        </div>
-        """, unsafe_allow_html=True)
+        render_kpi_card("Tasa de Recuperación", f"{tasa_g:.1f}%", "Recuperados vs Hurtados", "#0EA5E9", "#0284C7", "#64748B")
     with col4:
-        st.markdown(f"""
-        <div class="kpi-card" style="border-top: 4px solid #F59E0B;">
-            <div class="kpi-label">Municipio Más Afectado</div>
-            <div class="kpi-number" style="font-size: 1.45rem; color: #D97706;">{mun_c}</div>
-            <div class="kpi-sub" style="color: #D97706;">Mayor concentración criminal</div>
-        </div>
-        """, unsafe_allow_html=True)
+        render_kpi_card("Municipio Más Afectado", mun_c, "Mayor concentración criminal", "#F59E0B", "#D97706", "#D97706")
 
     st.info("💡 **¿Desea explorar la ficha táctica de una ciudad específica?** Seleccione arriba el botón **'🔍 Ficha Táctica Municipal (Seleccionar Ciudad)'** o utilice el filtro del panel lateral izquierdo.")
 
@@ -651,79 +369,55 @@ elif "🌲 Clasificación" in seccion:
     g_m = models_data["metricas"]["gnb"]
     
     with m_col1:
-        st.markdown(f"""
-        <div class="kpi-card" style="border: 2px solid #10B981; background: #FAFDFB;">
-            <span class="pill-win">🏆 GANADOR OFICIAL</span>
-            <h3 style="margin: 12px 0 6px 0; color: #065F46; font-size: 1.3rem;">Árbol de Decisión</h3>
-            <p style="margin:0; font-size: 0.85rem; color: #475569;">Profundidad óptima = 4</p>
-            <hr style="margin: 12px 0; border: none; border-top: 1px solid #D1FAE5;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                <span style="color:#64748B; font-size:0.85rem;">Accuracy Test:</span>
-                <b style="color:#0F172A;">{t_m['acc']*100:.2f}%</b>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                <span style="color:#64748B; font-size:0.85rem;">Recall (Sensibilidad):</span>
-                <b style="color:#059669;">{t_m['recall']*100:.2f}%</b>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span style="color:#64748B; font-size:0.85rem;">F1-Score:</span>
-                <b style="color:#0F172A;">{t_m['f1']:.3f}</b>
-            </div>
-            <p style="margin: 14px 0 0 0; font-size: 0.78rem; color: #047857; font-weight: 600;">
-                ✓ Velocidad de inferencia: 0.0009s · 100% interpretable en estrados y mandos policiales.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+        render_model_card(
+            pill_class="pill-win",
+            pill_text="🏆 GANADOR OFICIAL",
+            title="Árbol de Decisión",
+            subtitle="Profundidad óptima = 4",
+            acc=f"{t_m['acc']*100:.2f}%",
+            recall=f"{t_m['recall']*100:.2f}%",
+            f1=f"{t_m['f1']:.3f}",
+            note="✓ Velocidad de inferencia: 0.0009s · 100% interpretable en estrados y mandos policiales.",
+            border_color="#10B981",
+            bg_color="#FAFDFB",
+            title_color="#065F46",
+            recall_color="#059669",
+            note_color="#047857"
+        )
 
     with m_col2:
-        st.markdown(f"""
-        <div class="kpi-card" style="border: 1px solid #BFDBFE;">
-            <span class="pill-runner">SUBCAMPEÓN</span>
-            <h3 style="margin: 12px 0 6px 0; color: #1E40AF; font-size: 1.3rem;">KNN (k = 31)</h3>
-            <p style="margin:0; font-size: 0.85rem; color: #475569;">Normalización StandardScaler</p>
-            <hr style="margin: 12px 0; border: none; border-top: 1px solid #E2E8F0;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                <span style="color:#64748B; font-size:0.85rem;">Accuracy Test:</span>
-                <b style="color:#0F172A;">{k_m['acc']*100:.2f}%</b>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                <span style="color:#64748B; font-size:0.85rem;">Recall:</span>
-                <b style="color:#1E40AF;">{k_m['recall']*100:.2f}%</b>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span style="color:#64748B; font-size:0.85rem;">F1-Score:</span>
-                <b style="color:#0F172A;">{k_m['f1']:.3f}</b>
-            </div>
-            <p style="margin: 14px 0 0 0; font-size: 0.78rem; color: #64748B;">
-                ⚠️ 46 veces más lento en inferencia. Inviable para despliegue en tiempo real con 54k filas.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+        render_model_card(
+            pill_class="pill-runner",
+            pill_text="SUBCAMPEÓN",
+            title="KNN (k = 31)",
+            subtitle="Normalización StandardScaler",
+            acc=f"{k_m['acc']*100:.2f}%",
+            recall=f"{k_m['recall']*100:.2f}%",
+            f1=f"{k_m['f1']:.3f}",
+            note="⚠️ 46 veces más lento en inferencia. Inviable para despliegue en tiempo real con 54k filas.",
+            border_color="#BFDBFE",
+            bg_color="#FFFFFF",
+            title_color="#1E40AF",
+            recall_color="#1E40AF",
+            note_color="#64748B"
+        )
 
     with m_col3:
-        st.markdown(f"""
-        <div class="kpi-card" style="border: 1px solid #FECDD3;">
-            <span class="pill-fail">DESCARTADO</span>
-            <h3 style="margin: 12px 0 6px 0; color: #9F1239; font-size: 1.3rem;">Gaussian Naive Bayes</h3>
-            <p style="margin:0; font-size: 0.85rem; color: #475569;">Supuesto de independencia</p>
-            <hr style="margin: 12px 0; border: none; border-top: 1px solid #E2E8F0;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                <span style="color:#64748B; font-size:0.85rem;">Accuracy Test:</span>
-                <b style="color:#0F172A;">{g_m['acc']*100:.2f}%</b>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                <span style="color:#64748B; font-size:0.85rem;">Recall:</span>
-                <b style="color:#BE123C;">{g_m['recall']*100:.2f}%</b>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span style="color:#64748B; font-size:0.85rem;">F1-Score:</span>
-                <b style="color:#0F172A;">{g_m['f1']:.3f}</b>
-            </div>
-            <p style="margin: 14px 0 0 0; font-size: 0.78rem; color: #BE123C; font-weight:600;">
-                🚨 2,750 falsos negativos. Deja sin protección policial a municipios con crimen activo.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+        render_model_card(
+            pill_class="pill-fail",
+            pill_text="DESCARTADO",
+            title="Gaussian Naive Bayes",
+            subtitle="Supuesto de independencia",
+            acc=f"{g_m['acc']*100:.2f}%",
+            recall=f"{g_m['recall']*100:.2f}%",
+            f1=f"{g_m['f1']:.3f}",
+            note="🚨 2,750 falsos negativos. Deja sin protección policial a municipios con crimen activo.",
+            border_color="#FECDD3",
+            bg_color="#FFFFFF",
+            title_color="#9F1239",
+            recall_color="#BE123C",
+            note_color="#BE123C"
+        )
 
     st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
     
@@ -746,27 +440,21 @@ elif "🌲 Clasificación" in seccion:
         prob = models_data["tree_clf"].predict_proba(vec)[0][1]
         
         if pred == 1:
-            st.markdown(f"""
-            <div style="background:#FFF1F2; border-left:6px solid #F43F5E; padding:18px; border-radius:12px; margin-top:14px;">
-                <h4 style="color:#9F1239; margin:0 0 6px 0;">🚨 ALERTA: MUNICIPIO EN CONDICIÓN DE HURTO ACTIVO</h4>
-                <div style="color:#881337; font-size:0.95rem;">
-                    • <b>Probabilidad calculada por el Árbol:</b> {prob*100:.1f}%<br>
-                    • <b>Dictamen:</b> La concentración del parque automotor ({s_parque:,}) supera el umbral crítico de exposición criminal.<br>
-                    • <b>Recomendación Táctica:</b> Asignación prioritaria de patrullaje por cuadrantes y puestos de control móvil.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            render_alert_card(
+                titulo="🚨 ALERTA: MUNICIPIO EN CONDICIÓN DE HURTO ACTIVO",
+                probabilidad=f"{prob*100:.1f}%",
+                dictamen=f"La concentración del parque automotor ({s_parque:,}) supera el umbral crítico de exposición criminal.",
+                recomendacion="Asignación prioritaria de patrullaje por cuadrantes y puestos de control móvil.",
+                es_alerta=True
+            )
         else:
-            st.markdown(f"""
-            <div style="background:#ECFDF5; border-left:6px solid #10B981; padding:18px; border-radius:12px; margin-top:14px;">
-                <h4 style="color:#065F46; margin:0 0 6px 0;">✅ ZONA SEGURA: BAJO RIESGO DE HURTO VEHICULAR</h4>
-                <div style="color:#064E3B; font-size:0.95rem;">
-                    • <b>Probabilidad estimada:</b> {prob*100:.1f}%<br>
-                    • <b>Dictamen:</b> Municipio en rango de baja incidencia delictiva.<br>
-                    • <b>Recomendación:</b> Monitoreo preventivo ordinario.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            render_alert_card(
+                titulo="✅ ZONA SEGURA: BAJO RIESGO DE HURTO VEHICULAR",
+                probabilidad=f"{prob*100:.1f}%",
+                dictamen="Municipio en rango de baja incidencia delictiva.",
+                recomendacion="Monitoreo preventivo ordinario.",
+                es_alerta=False
+            )
     st.markdown("</div>", unsafe_allow_html=True)
 
 
@@ -786,56 +474,13 @@ elif "🎯 Segmentación" in seccion:
     # 4 Tarjetas de Clusters
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown("""
-        <div class="kpi-card" style="border-left: 5px solid #10B981;">
-            <div style="font-size:0.8rem; font-weight:700; color:#10B981;">🟢 CLUSTER 0</div>
-            <h4 style="margin:4px 0 6px 0; color:#0F172A; font-size:1.05rem;">Zonas Pacíficas</h4>
-            <div style="font-size:1.4rem; font-weight:800; color:#0F172A;">88.9%</div>
-            <div style="font-size:0.8rem; color:#64748B; margin-top:4px;">24,521 registros</div>
-            <hr style="margin:8px 0; border:none; border-top:1px solid #E2E8F0;">
-            <div style="font-size:0.78rem; color:#475569;">Hurto prom: <b>3.8 / año</b></div>
-            <div style="font-size:0.78rem; color:#475569;">Recuperación: <b>75.6%</b></div>
-        </div>
-        """, unsafe_allow_html=True)
-
+        render_cluster_kpi("🟢 CLUSTER 0", "Zonas Pacíficas", "88.9%", "24,521 registros", "3.8 / año", "75.6%", "#10B981")
     with c2:
-        st.markdown("""
-        <div class="kpi-card" style="border-left: 5px solid #F59E0B;">
-            <div style="font-size:0.8rem; font-weight:700; color:#F59E0B;">🟡 CLUSTER 1</div>
-            <h4 style="margin:4px 0 6px 0; color:#0F172A; font-size:1.05rem;">Riesgo Moderado</h4>
-            <div style="font-size:1.4rem; font-weight:800; color:#0F172A;">5.4%</div>
-            <div style="font-size:0.8rem; color:#64748B; margin-top:4px;">1,482 registros</div>
-            <hr style="margin:8px 0; border:none; border-top:1px solid #E2E8F0;">
-            <div style="font-size:0.78rem; color:#475569;">Hurto prom: <b>37.2 / año</b></div>
-            <div style="font-size:0.78rem; color:#475569;">Recuperación: <b>83.5%</b></div>
-        </div>
-        """, unsafe_allow_html=True)
-
+        render_cluster_kpi("🟡 CLUSTER 1", "Riesgo Moderado", "5.4%", "1,482 registros", "37.2 / año", "83.5%", "#F59E0B")
     with c3:
-        st.markdown("""
-        <div class="kpi-card" style="border-left: 5px solid #F43F5E; background: #FFFBFB;">
-            <div style="font-size:0.8rem; font-weight:700; color:#F43F5E;">🔴 CLUSTER 2</div>
-            <h4 style="margin:4px 0 6px 0; color:#9F1239; font-size:1.05rem;">FOCO CRÍTICO</h4>
-            <div style="font-size:1.4rem; font-weight:800; color:#9F1239;">2.4%</div>
-            <div style="font-size:0.8rem; color:#F43F5E; margin-top:4px; font-weight:600;">666 registros</div>
-            <hr style="margin:8px 0; border:none; border-top:1px solid #FECDD3;">
-            <div style="font-size:0.78rem; color:#9F1239;">Hurto prom: <b>201.8 / año</b></div>
-            <div style="font-size:0.78rem; color:#9F1239;">Recuperación: <b>26.5%</b></div>
-        </div>
-        """, unsafe_allow_html=True)
-
+        render_cluster_kpi("🔴 CLUSTER 2", "FOCO CRÍTICO", "2.4%", "666 registros", "201.8 / año", "26.5%", "#F43F5E", bg_color="#FFFBFB", title_color="#9F1239", sub_color="#F43F5E")
     with c4:
-        st.markdown("""
-        <div class="kpi-card" style="border-left: 5px solid #0EA5E9;">
-            <div style="font-size:0.8rem; font-weight:700; color:#0EA5E9;">🟠 CLUSTER 3</div>
-            <h4 style="margin:4px 0 6px 0; color:#0F172A; font-size:1.05rem;">Parque Grande</h4>
-            <div style="font-size:1.4rem; font-weight:800; color:#0F172A;">3.3%</div>
-            <div style="font-size:0.8rem; color:#64748B; margin-top:4px;">908 registros</div>
-            <hr style="margin:8px 0; border:none; border-top:1px solid #E2E8F0;">
-            <div style="font-size:0.78rem; color:#475569;">Hurto prom: <b>38.0 / año</b></div>
-            <div style="font-size:0.78rem; color:#475569;">Recuperación: <b>43.0%</b></div>
-        </div>
-        """, unsafe_allow_html=True)
+        render_cluster_kpi("🟠 CLUSTER 3", "Parque Grande", "3.3%", "908 registros", "38.0 / año", "43.0%", "#0EA5E9")
 
     st.info("💡 **¿Desea explorar la ficha táctica de una ciudad específica?** Seleccione arriba el botón **'🔍 Ficha Táctica Municipal (Seleccionar Ciudad)'** o utilice el filtro del panel lateral izquierdo.")
 
