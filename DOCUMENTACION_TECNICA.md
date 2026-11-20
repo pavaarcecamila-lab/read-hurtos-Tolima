@@ -487,29 +487,60 @@ Todos los scripts y cuadernos han sido desarrollados bajo principios de arquitec
 
 | Componente | Archivo / Enlace | Descripción y Responsabilidad |
 | :--- | :--- | :--- |
-| **Pipeline Limpieza Hurto** | [`src/hurto.py`](file:///c:/Users/Natali/OneDrive/Documentos/Universidad/OCTAVO/MineriaDatos/read-hurtos-Tolima/src/hurto.py) | Clase modular para diagnóstico, limpieza, formateo DANE y extracción de tipos vehiculares en hurtos. |
-| **Pipeline Limpieza Recuperación** | [`src/recuperacion.py`](file:///c:/Users/Natali/OneDrive/Documentos/Universidad/OCTAVO/MineriaDatos/read-hurtos-Tolima/src/recuperacion.py) | Deduplicación masiva (~72K duplicados), normalización DANE y limpieza de recuperaciones policiales. |
-| **Pipeline Limpieza Parque RUNT** | [`src/parque_automotor.py`](file:///c:/Users/Natali/OneDrive/Documentos/Universidad/OCTAVO/MineriaDatos/read-hurtos-Tolima/src/parque_automotor.py) | Filtrado de estado activo, corrección de años anómalos (1900) y agregación de parque registrado. |
-| **Módulo de Integración** | [`src/integracion.py`](file:///c:/Users/Natali/OneDrive/Documentos/Universidad/OCTAVO/MineriaDatos/read-hurtos-Tolima/src/integracion.py) | Consolidación relacional por clave compuesta de 5 atributos e imputación analítica de nulos con cero. |
-| **Transformación y Reducción** | [`src/transformacion.py`](file:///c:/Users/Natali/OneDrive/Documentos/Universidad/OCTAVO/MineriaDatos/read-hurtos-Tolima/src/transformacion.py) | Demostración de "El Gancho", comparación de escaladores, `RobustScaler`, One-Hot Encoding y PCA. |
-| **Análisis Exploratorio (EDA)** | [`src/eda.py`](file:///c:/Users/Natali/OneDrive/Documentos/Universidad/OCTAVO/MineriaDatos/read-hurtos-Tolima/src/eda.py) | Estadísticas descriptivas completas, cuantificación IQR, correlación Pearson y exportación de figuras. |
-| **Notebook Integración y Limpieza** | [`analisis/analisis_datos.ipynb`](file:///c:/Users/Natali/OneDrive/Documentos/Universidad/OCTAVO/MineriaDatos/read-hurtos-Tolima/analisis/analisis_datos.ipynb) | Cuaderno paso a paso documentando la carga, limpieza diagnóstica e integración de fuentes. |
-| **Notebook Transformación / PCA** | [`analisis/transformacion_escalabilidad.ipynb`](file:///c:/Users/Natali/OneDrive/Documentos/Universidad/OCTAVO/MineriaDatos/read-hurtos-Tolima/analisis/transformacion_escalabilidad.ipynb) | Cuaderno interactivo demostrando escalabilidad, distancias euclídeas y componentes principales. |
-| **Notebook Exploratorio Formal** | [`analisis/analisis_exploratorio_eda.ipynb`](file:///c:/Users/Natali/OneDrive/Documentos/Universidad/OCTAVO/MineriaDatos/read-hurtos-Tolima/analisis/analisis_exploratorio_eda.ipynb) | Ejecución interactiva del EDA con salidas visuales, pruebas univariadas y multivariadas. |
-| **Carpeta de Figuras** | [`analisis/figuras/`](file:///c:/Users/Natali/OneDrive/Documentos/Universidad/OCTAVO/MineriaDatos/read-hurtos-Tolima/analisis/figuras) | Galería de las 8 figuras a 150 DPI listas para publicación e informes institucionales. |
+| **Pipeline Limpieza Hurto** | [`src/hurto.py`](file:///read-hurtos-Tolima/src/hurto.py) | Clase modular para diagnóstico, limpieza, formateo DANE y extracción de tipos vehiculares en hurtos. |
+| **Pipeline Limpieza Recuperación** | [`src/recuperacion.py`](file:///read-hurtos-Tolima/src/recuperacion.py) | Deduplicación masiva (~72K duplicados), normalización DANE y limpieza de recuperaciones policiales. |
+| **Pipeline Limpieza Parque RUNT** | [`src/parque_automotor.py`](file:///read-hurtos-Tolima/src/parque_automotor.py) | Filtrado de estado activo, corrección de años anómalos (1900) y agregación de parque registrado. |
+| **Módulo de Integración** | [`src/integracion.py`](file:///read-hurtos-Tolima/src/integracion.py) | Consolidación relacional por clave compuesta de 5 atributos e imputación analítica de nulos con cero. |
+| **Transformación y Reducción** | [`src/transformacion.py`](file:///read-hurtos-Tolima/src/transformacion.py) | Demostración de "El Gancho", comparación de escaladores, `RobustScaler`, One-Hot Encoding y PCA. |
+| **Análisis Exploratorio (EDA)** | [`src/eda.py`](file:///read-hurtos-Tolima/src/eda.py) | Estadísticas descriptivas completas, cuantificación IQR, correlación Pearson y exportación de figuras. |
+| **Torneo de Clasificación II** | [`src/clasificacion.py`](file:///read-hurtos-Tolima/src/clasificacion.py) | Torneo formal: Árbol vs GaussianNB vs KNN, exploración de k, distancia manual y veredicto. |
+| **Segmentación no Supervisada** | [`src/clustering.py`](file:///read-hurtos-Tolima/src/clustering.py) | K-Means, Método del Codo, Silueta, perfilamiento real, dendrograma Ward y exportación. |
+| **Notebook Integración y Limpieza** | [`analisis/analisis_datos.ipynb`](file:///read-hurtos-Tolima/analisis/analisis_datos.ipynb) | Cuaderno paso a paso documentando la carga, limpieza diagnóstica e integración de fuentes. |
+| **Notebook Transformación / PCA** | [`analisis/transformacion_escalabilidad.ipynb`](file:///read-hurtos-Tolima/analisis/transformacion_escalabilidad.ipynb) | Cuaderno interactivo demostrando escalabilidad, distancias euclídeas y componentes principales. |
+| **Notebook Exploratorio Formal** | [`analisis/analisis_exploratorio_eda.ipynb`](file:///read-hurtos-Tolima/analisis/analisis_exploratorio_eda.ipynb) | Ejecución interactiva del EDA con salidas visuales, pruebas univariadas y multivariadas. |
+| **Notebook Sesión 8 Clasificación** | [`analisis/sesion8_clasificacion_nb_knn.ipynb`](file:///read-hurtos-Tolima/analisis/sesion8_clasificacion_nb_knn.ipynb) | Cuaderno interactivo ejecutable del Torneo de Clasificación II con salidas completas. |
+| **Notebook Sesión 9 Clustering** | [`analisis/sesion9_clustering_kmeans_jerarquico.ipynb`](file:///read-hurtos-Tolima/analisis/sesion9_clustering_kmeans_jerarquico.ipynb) | Cuaderno interactivo ejecutable de K-Means y Jerárquico Aglomerativo con salidas completas. |
+| **Informe Técnico Sesión 8** | [`analisis/TORNEO_CLASIFICACION_SESION8.md`](file:///read-hurtos-Tolima/analisis/TORNEO_CLASIFICACION_SESION8.md) | Documento formal del torneo, exploración de k, Bayes y guion de sustentación oral. |
+| **Informe Técnico Sesión 9** | [`analisis/SEGMENTACION_CLUSTERING_SESION9.md`](file:///read-hurtos-Tolima/analisis/SEGMENTACION_CLUSTERING_SESION9.md) | Documento formal de segmentación, codo, silueta, perfiles, dendrograma y campañas. |
+| **Carpeta de Figuras** | [`analisis/figuras/`](file:///read-hurtos-Tolima/analisis/figuras) | Galería completa de 14 figuras a 150 DPI listas para informe y sustentación. |
 
 ### Comandos de Ejecución y Reproducción:
 Para re-ejecutar el pipeline de análisis completo y regenerar las figuras y métricas:
 ```bash
-# 1. Posicionarse en la raíz del proyecto
-cd "c:\Users\Natali\OneDrive\Documentos\Universidad\OCTAVO\MineriaDatos\read-hurtos-Tolima"
+# 1. Posicionarse en la carpeta read-hurtos-Tolima
+cd read-hurtos-Tolima
 
-# 2. Ejecutar el módulo de análisis exploratorio de datos (EDA)
-python src/eda.py
+# 2. Ejecutar el torneo de clasificación de la Sesión 8
+python -c "from src.clasificacion import TorneoClasificacion; t = TorneoClasificacion(); t.ejecutar_torneo(); t.explorar_k_knn(); t.generar_graficos()"
 
-# 3. Ejecutar el módulo de transformación, escalamiento y reducción (PCA)
-python -c "from src.transformacion import Transformacion; t = Transformacion(); t.generar_dataset_reducido(); t.guardar_reducido()"
+# 3. Ejecutar la segmentación de clustering de la Sesión 9
+python -c "from src.clustering import SegmentacionClustering; s = SegmentacionClustering(); s.evaluar_codo_y_silueta(); s.perfilar_clusters(); s.generar_graficos(); s.exportar_dataset_con_clusters()"
 ```
+
+---
+
+## 14. SESIÓN 8 · CLASIFICACIÓN II: TORNEO DE MODELOS (NAIVE BAYES Y KNN)
+
+### 14.1 Resultados Oficiales del Torneo
+Sobre la partición estratificada al 25% de prueba ($13.607$ registros):
+* **Árbol de Decisión (`max_depth=4`):** Ganador absoluto con **$82,71\%$ de Accuracy** y **$82,75\%$ de F1-Score**. Inferencia instantánea ($0,0015$ s).
+* **Gaussian Naive Bayes (`GaussianNB`):** Fit ultrarrápido ($0,0036$ s), pero exactitud limitada al **$70,46\%$** debido a la correlación natural entre el parque automotor y las recuperaciones policiales.
+* **KNN (`k=5`) Escalado:** **$81,13\%$ de Accuracy** y F1 de **$81,17\%$**. Sin escalamiento decae a **$80,31\%$**, ratificando que la distancia euclidiana requiere estandarización estricta.
+* **Exploración de $k$:** Identificación de sobreajuste severo en $k=1$ (brecha de $9,15\%$), meseta óptima de generalización en $k=31$ ($82,55\%$) y tendencia a la clase mayoritaria en $k=51$.
+
+---
+
+## 15. SESIÓN 9 · CLUSTERING: SEGMENTACIÓN K-MEANS Y JERÁRQUICO
+
+### 15.1 Metodología de Pureza No Supervisada
+Se aislaron las variables operativas `AÑO`, `VEHICULOS_REGISTRADOS` y `VEHICULOS_RECUPERADOS`, excluyendo `VEHICULOS_HURTADOS` de la matriz $X$.
+* **Método del Codo y Silueta:** Inflexión determinante en **$k=3$** (reducción de inercia de $103.591$ a $63.857$, con coeficiente de silueta de $0,545$).
+* **Tres Segmentos Naturales Identificados:**
+  1. **S1 · Archivo Histórico Premetropolitano ($28,4\%$):** Registros anteriores al año 2000, sin reportes de hurto ni recuperación. Acción: Depuración y consolidación documental en el RUNT.
+  2. **S2 · Cabeceras Municipales con Delincuencia Contenida ($67,3\%$):** Época moderna, parque moderado ($175$ veh), $5,56$ hurtos promedio y $43,7\%$ de recuperación policial. Acción: Patrullajes preventivos contra el halado de motos.
+  3. **S3 · Grandes Focos Metropolitanos de Hurto Masivo ($4,3\%$):** Capitales principales (Bogotá, Medellín, Cali, Ibagué), con parque de $4.634$ unidades, $78,29$ hurtos y $79,6\%$ de tasa activa. Acción: Inteligencia policial contra deshuese y cámaras LPR.
+* **Validación Jerárquica:** El dendrograma aglomerativo Ward sobre 60 municipios reales ratifica visualmente la división en 3 ramas mediante corte a altura $6,3$.
+* **Dataset Enriquecido:** Exportación a `dataset/dataset_con_clusters.csv` con columnas `CLUSTER_KMEANS` y `SEGMENTO_ESTRATEGICO`.
 
 ---
 *Documentación técnica generada bajo estándares de calidad de software y analítica predictiva según los instrumentos del PEA de Minería de Datos.*

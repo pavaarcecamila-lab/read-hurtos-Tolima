@@ -4,6 +4,8 @@ from .parque_automotor import ParqueAutomotor
 from .integracion import Integracion
 from .transformacion import Transformacion
 from .eda import EDA
+from .clasificacion import TorneoClasificacion
+from .clustering import SegmentacionClustering
 
 __all__ = [
     "Hurto",
@@ -11,6 +13,7 @@ __all__ = [
     "ParqueAutomotor",
     "Integracion",
     "Transformacion",
-    "EDA"
+    "EDA",
+    "TorneoClasificacion",
+    "SegmentacionClustering"
 ]
-

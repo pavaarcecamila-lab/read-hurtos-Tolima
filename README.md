@@ -148,6 +148,38 @@ Las figuras generadas en alta resolución ($150$ DPI) bajo estándares de honest
 7. `fig_box_hurto_tipo_vehiculo.png`: Comparación del rango intercuartílico en departamentos críticos (Motocicletas triplican la dispersión).
 8. `fig_tendencia_temporal_tasa_recuperacion.png`: Tendencia multianual que revela la brecha estructural de efectividad policial en motocicletas ($41.3\%$ vs $49.4\%$ en autos).
 
+## Clasificación II · Sesión 8 (Torneo: Árbol vs Naive Bayes vs KNN)
+
+La Sesión 8 se encuentra implementada en:
+* Módulo modular: `src/clasificacion.py`
+* Cuaderno interactivo reproducible: `analisis/sesion8_clasificacion_nb_knn.ipynb`
+* Documento técnico y guion de sustentación: `analisis/TORNEO_CLASIFICACION_SESION8.md`
+
+Principales resultados del torneo sobre $54.428$ observaciones (partición 75% train / 25% test con semilla 42 y estratificación):
+* **Árbol de Decisión (prof=4):** **Ganador del torneo con 82,71% de Accuracy y 82,75% de F1-Score**. Inferencia instantánea ($0,0015$ s) y máxima interpretabilidad jurídica en 4 reglas.
+* **Gaussian Naive Bayes (GaussianNB):** Entrenamiento ultrarrápido ($0,0036$ s), pero exactitud de **70,46%** por doble conteo de evidencia derivado de la correlación entre parque y recuperaciones.
+* **KNN (k=5) con Pipeline StandardScaler:** **81,13% de Accuracy**. Demostración empírica de que sin escalamiento decae a **80,31%** (el parque automotor secuestra la distancia euclidiana).
+* **Exploración de $k$:** Se demostró sobreajuste en $k=1$ (brecha de $9,15\%$), equilibrio óptimo en $k=31$ ($82,55\%$) y subajuste con $k=51$.
+* **Figuras generadas:** `fig_sesion8_torneo_comparacion.png`, `fig_sesion8_efecto_k_knn.png` y `fig_sesion8_matrices_confusion.png`.
+
+## Clustering · Sesión 9 (Segmentación No Supervisada: K-Means y Jerárquico)
+
+La Sesión 9 se encuentra implementada en:
+* Módulo modular: `src/clustering.py`
+* Cuaderno interactivo reproducible: `analisis/sesion9_clustering_kmeans_jerarquico.ipynb`
+* Documento técnico y guion de sustentación: `analisis/SEGMENTACION_CLUSTERING_SESION9.md`
+* Dataset enriquecido: `dataset/dataset_con_clusters.csv`
+
+Metodología y resultados de la segmentación no supervisada:
+* **Pureza No Supervisada:** Se excluyó `VEHICULOS_HURTADOS` de la matriz $X$, agrupando únicamente sobre variables estructurales escaladas (`AÑO`, `VEHICULOS_REGISTRADOS`, `VEHICULOS_RECUPERADOS`).
+* **Selección de $k$:** Evaluación de $k \in [2..8]$ mediante Método del Codo y Silueta. Se seleccionó **$k=3$** por el quiebre de inercia ($103.591 \rightarrow 63.857$), silueta robusta ($0,545$) y viabilidad de 3 planes de seguridad diferenciados.
+* **Los 3 Segmentos Descubiertos y Nombrados:**
+  1. *S1 · Archivo Histórico Premetropolitano (Inmune):* $28,4\%$ de casos, año promedio 1974,9, hurtos nulos (era pre-digital). Acción: saneamiento registral en el RUNT.
+  2. *S2 · Cabeceras Municipales con Delincuencia Contenida:* $67,3\%$ de casos, año medio 2013,7, $5,56$ hurtos promedio y $43,7\%$ de recuperación. Acción: cuadrantes preventivos y puestos de control.
+  3. *S3 · Grandes Focos Metropolitanos de Hurto Masivo:* $4,3\%$ de casos (Bogotá, Medellín, Cali, Ibagué), $4.634$ vehículos de parque medio, $78,29$ hurtos y $79,6\%$ de tasa activa. Acción: inteligencia DIJIN/SIPOL contra talleres de deshuese y cámaras LPR.
+* **Clustering Jerárquico Aglomerativo (Ward):** Dendrograma sobre muestra representativa de 60 municipios con corte horizontal a altura $6,3$, validando científicamente los 3 grupos.
+* **Figuras generadas:** `fig_sesion9_metodo_codo_silueta.png`, `fig_sesion9_perfilamiento_clusters.png` y `fig_sesion9_dendrograma_muestra60.png`.
+
 ## Estructura del proyecto
 
 ```text
@@ -163,7 +195,8 @@ mineria-datos-accidentes-v2 / hurto-vehiculos-colombia/
 │   ├── RecuperacionPoliciaNacional_limpio.csv
 │   ├── dataset_integrado.csv
 │   ├── dataset_integrado.xlsx
-│   └── dataset_reducido.csv
+│   ├── dataset_reducido.csv
+│   └── dataset_con_clusters.csv
 │
 ├── src/
 │   ├── __init__.py
@@ -172,13 +205,21 @@ mineria-datos-accidentes-v2 / hurto-vehiculos-colombia/
 │   ├── parque_automotor.py
 │   ├── integracion.py
 │   ├── transformacion.py
-│   └── eda.py
+│   ├── eda.py
+│   ├── clasificacion.py
+│   └── clustering.py
 │
 ├── analisis/
 │   ├── analisis_datos.ipynb
 │   ├── transformacion_escalabilidad.ipynb
 │   ├── analisis_exploratorio_eda.ipynb
+│   ├── sesion8_clasificacion_nb_knn.ipynb
+│   ├── sesion9_clustering_kmeans_jerarquico.ipynb
 │   ├── INFORME_LABORATORIO_EDA.md
+│   ├── ARBOLES_DE_DECISION_Y_ACCURACY.md
+│   ├── RESULTADOS_ACCURACY_Y_ARBOLES.md
+│   ├── TORNEO_CLASIFICACION_SESION8.md
+│   ├── SEGMENTACION_CLUSTERING_SESION9.md
 │   └── figuras/
 │       ├── fig_hist_hurtos.png
 │       ├── fig_box_hurtos.png
@@ -187,7 +228,14 @@ mineria-datos-accidentes-v2 / hurto-vehiculos-colombia/
 │       ├── fig_heatmap_correlaciones.png
 │       ├── fig_matriz_dispersion.png
 │       ├── fig_box_hurto_tipo_vehiculo.png
-│       └── fig_tendencia_temporal_tasa_recuperacion.png
+│       ├── fig_tendencia_temporal_tasa_recuperacion.png
+│       ├── fig_accuracy_arbol.png
+│       ├── fig_sesion8_torneo_comparacion.png
+│       ├── fig_sesion8_efecto_k_knn.png
+│       ├── fig_sesion8_matrices_confusion.png
+│       ├── fig_sesion9_metodo_codo_silueta.png
+│       ├── fig_sesion9_perfilamiento_clusters.png
+│       └── fig_sesion9_dendrograma_muestra60.png
 │
 ├── .gitignore
 └── README.md
@@ -195,5 +243,5 @@ mineria-datos-accidentes-v2 / hurto-vehiculos-colombia/
 
 ## Resultado final
 
-El proyecto permite integrar tres fuentes de información oficiales de Colombia y aplicar un proceso reproducible de **limpieza, integración, transformación, escalamiento, reducción de dimensionalidad (PCA) y análisis exploratorio formal (EDA)**, obteniendo datasets y modelos descriptivos robustos que sustentan la toma de decisiones estratégicas en seguridad vial y recuperación vehicular en Colombia.
+El proyecto permite integrar tres fuentes de información oficiales de Colombia y aplicar un proceso reproducible de **limpieza, integración, transformación, escalamiento, reducción de dimensionalidad (PCA), análisis exploratorio formal (EDA), clasificación supervisada (Árboles de Decisión, Naive Bayes y KNN) y segmentación no supervisada (K-Means y Jerárquico)**, obteniendo datasets y modelos predictivos y descriptivos robustos que sustentan la toma de decisiones estratégicas en seguridad vial y recuperación vehicular en Colombia.
 
