@@ -1,28 +1,52 @@
+# ==============================================================================
+# GITIGNORE PROFESIONAL · CIENCIA DE DATOS & MACHINE LEARNING
+# ==============================================================================
+
 # Entornos virtuales
 .venv/
-env/
 venv/
+env/
 ENV/
 .local_python/
+env.bak/
+venv.bak/
 
-# Python cache y compilados
+# Byte-compiled / optimizados de Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+.Python
 
-# Jupyter Notebook checkpoints
+# Jupyter Notebook checkpoints y cache
 .ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+*-checkpoint.ipynb
 
-# Sistema Operativo y Office
+# Sistema Operativo y Gestores de Archivos
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-~$*
+desktop.ini
 
-# Temporales de IDE
+# Archivos de bloqueo temporal de Microsoft Office
+~$*
+.~lock.*
+
+# IDEs y Editores de código
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
 
-# Scratch temporal
-scratch/
+# Logs y Archivos temporales
+*.log
 *.tmp
+scratch/
+.pytest_cache/
+.coverage
+htmlcov/
