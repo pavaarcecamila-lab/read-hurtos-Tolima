@@ -247,6 +247,7 @@ seccion = st.radio(
         "🌲 Clasificación Supervisada (Árbol, KNN, Bayes)",
         "🎯 Segmentación Territorial (K-Means & Jerárquico)",
         "🔍 Ficha Táctica Municipal (Seleccionar Ciudad)",
+        "📐 Métodos Numéricos (Regresión & Lagrange)",
         "📑 Conclusiones & Recomendaciones"
     ],
     horizontal=True,
@@ -571,6 +572,44 @@ elif "🔍 Ficha Táctica" in seccion:
             use_container_width=True
         )
         st.markdown("</div>", unsafe_allow_html=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECCIÓN: MÉTODOS NUMÉRICOS (REGRESIÓN & LAGRANGE)
+# ─────────────────────────────────────────────────────────────────────────────
+elif "📐 Métodos Numéricos" in seccion:
+    import streamlit.components.v1 as components
+    
+    st.markdown("""
+    <div style="margin-bottom: 16px;">
+        <h2 style="color: #0F172A; margin:0 0 6px 0; font-size: 1.6rem;">📐 Sustentación de Métodos Numéricos: Regresión Lineal & Lagrange</h2>
+        <p style="color: #64748B; margin:0; font-size: 0.95rem;">
+            Implementación comparativa interactiva: Regresión Lineal por Mínimos Cuadrados (MCO) e Interpolación Polinomial de Lagrange sobre la serie histórica 2010–2024 de la Policía Nacional.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    ruta_html = Path(__file__).resolve().parent / "templates" / "presentacion_metodos_numericos.html"
+    if not ruta_html.exists():
+        ruta_html = Path(__file__).resolve().parent / "presentacion_metodos_numericos.html"
+        
+    if ruta_html.exists():
+        with open(ruta_html, "r", encoding="utf-8") as f:
+            html_content = f.read()
+        
+        c_down1, c_down2 = st.columns([1.5, 4])
+        with c_down1:
+            st.download_button(
+                label="📥 Descargar Presentación HTML",
+                data=html_content,
+                file_name="presentacion_metodos_numericos.html",
+                mime="text/html",
+                use_container_width=True
+            )
+        
+        components.html(html_content, height=1350, scrolling=True)
+    else:
+        st.error("No se encontró el archivo de presentación HTML.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
