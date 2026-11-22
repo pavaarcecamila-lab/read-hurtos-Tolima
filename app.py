@@ -236,10 +236,10 @@ render_hero_banner(
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# BARRA DE NAVEGACIÓN SUPERIOR (ACCESIBLE SIEMPRE, CON O SIN SIDEBAR)
+# MENÚ DE NAVEGACIÓN VERTICAL (ACCESIBLE SIEMPRE EN LA PÁGINA)
 # ─────────────────────────────────────────────────────────────────────────────
 seccion = st.radio(
-    "Navegación entre Módulos:",
+    "🧭 Menú de Navegación entre Módulos:",
     [
         "📊 Diagnóstico & Contexto Estratégico",
         "🌲 Clasificación Supervisada (Árbol, KNN, Bayes)",
@@ -248,7 +248,7 @@ seccion = st.radio(
         "📐 Métodos Numéricos (Regresión & Lagrange)",
         "📑 Conclusiones & Recomendaciones"
     ],
-    horizontal=True,
+    horizontal=False,
     index=0
 )
 
