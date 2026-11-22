@@ -236,7 +236,7 @@ class SegmentacionClustering:
         }
         return resumen
 
-    def generar_graficos(self, ruta_figuras="../analisis/figuras"):
+    def generar_graficos(self, ruta_figuras="../docs/figuras"):
         """Genera las tres figuras oficiales de la Sesión 9 en alta resolución (150 DPI)."""
         carpeta = Path(resolver_ruta(ruta_figuras))
         carpeta.mkdir(parents=True, exist_ok=True)

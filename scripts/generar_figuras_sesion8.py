@@ -40,7 +40,7 @@ plt.rcParams["font.size"] = 10
 plt.rcParams["axes.edgecolor"] = "#cccccc"
 plt.rcParams["axes.linewidth"] = 0.8
 
-CARPETA_FIGURAS = Path(__file__).resolve().parent.parent / "analisis" / "figuras"
+CARPETA_FIGURAS = Path(__file__).resolve().parent.parent / "docs" / "figuras"
 CARPETA_FIGURAS.mkdir(parents=True, exist_ok=True)
 
 # 1. Cargar y preparar datos

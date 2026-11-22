@@ -25,7 +25,7 @@ from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 
-FIGURAS = Path(__file__).resolve().parent.parent / "analisis" / "figuras"
+FIGURAS = Path(__file__).resolve().parent.parent / "docs" / "figuras"
 FIGURAS.mkdir(parents=True, exist_ok=True)
 DATASET = Path(__file__).resolve().parent.parent / "dataset" / "dataset_integrado.csv"
 

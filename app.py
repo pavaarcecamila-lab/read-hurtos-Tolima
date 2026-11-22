@@ -76,10 +76,8 @@ cargar_estilos_css()
 def cargar_datos():
     candidatos = [
         Path(__file__).resolve().parent / "dataset/dataset_integrado.csv",
-        Path(__file__).resolve().parent / "data/processed/dataset_integrado.csv",
-        Path("read-hurtos-Tolima/dataset/dataset_integrado.csv"),
         Path("dataset/dataset_integrado.csv"),
-        Path("/Users/camilapava/Documents/OCTAVO SEMESTRE/MINERIA 3 CORTE/read-hurtos-Tolima/dataset/dataset_integrado.csv")
+        Path("read-hurtos-Tolima/dataset/dataset_integrado.csv"),
     ]
     ruta = next((c for c in candidatos if c.exists()), None)
     if not ruta:
@@ -591,7 +589,7 @@ elif "📐 Métodos Numéricos" in seccion:
 
     ruta_html = Path(__file__).resolve().parent / "templates" / "presentacion_metodos_numericos.html"
     if not ruta_html.exists():
-        ruta_html = Path(__file__).resolve().parent / "presentacion_metodos_numericos.html"
+        ruta_html = Path(__file__).resolve().parent / "docs" / "metodos_numericos" / "presentacion_metodos_numericos.html"
         
     if ruta_html.exists():
         with open(ruta_html, "r", encoding="utf-8") as f:

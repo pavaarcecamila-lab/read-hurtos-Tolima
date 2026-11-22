@@ -306,7 +306,7 @@ class TorneoClasificacion:
         self.exploracion_k = pd.DataFrame(registros)
         return self.exploracion_k
 
-    def generar_graficos(self, ruta_figuras="../analisis/figuras"):
+    def generar_graficos(self, ruta_figuras="../docs/figuras"):
         """Genera las figuras oficiales de la Sesión 8 en alta resolución (150 DPI)."""
         carpeta = Path(resolver_ruta(ruta_figuras))
         carpeta.mkdir(parents=True, exist_ok=True)

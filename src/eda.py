@@ -266,7 +266,7 @@ class EDA:
         }
         return interpretaciones
 
-    def generar_galeria_figuras(self, carpeta_salida="analisis/figuras"):
+    def generar_galeria_figuras(self, carpeta_salida="docs/figuras"):
         """
         Genera y exporta la galería de 8 figuras en alta definición (150 DPI)
         cumpliendo estrictamente las buenas prácticas de la Sesión 5:

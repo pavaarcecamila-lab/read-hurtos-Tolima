@@ -132,24 +132,43 @@ read-hurtos-Tolima/
 │       └── modelos_v1.ipynb
 │
 ├── docs/                           # Hub de documentación técnica, académica y sustentación
-│   ├── DOCUMENTACION_TECNICA.md
-│   ├── PITCH_Y_SUSTENTACION_OFICIAL.md
-│   ├── SUSTENTACION_AUDITORIO.md
-│   ├── informes/                   # Informes metodológicos por sesión
-│   │   ├── INFORME_LABORATORIO_EDA.md
-│   │   ├── TORNEO_CLASIFICACION_SESION8.md
-│   │   └── SEGMENTACION_CLUSTERING_SESION9.md
+│   ├── README.md                   # Índice y guía general del acervo documental
+│   ├── DOCUMENTACION_TECNICA.md    # Manual técnico de arquitectura y endpoints
+│   ├── PITCH_Y_SUSTENTACION_OFICIAL.md # Guion y pitch de sustentación oficial
+│   ├── SUSTENTACION_AUDITORIO.md   # Estructura de exposición ante jurados
+│   ├── informes/                   # Informes técnicos ordenados por sesiones
+│   │   ├── 01_eda_informe_laboratorio.md
+│   │   ├── 02_eda_guia_sustentacion.md
+│   │   ├── 03_sesion7_arboles_decision_y_accuracy.md
+│   │   ├── 04_sesion7_resultados_y_evaluacion_arbol.md
+│   │   ├── 05_sesion8_torneo_clasificacion.md
+│   │   ├── 06_sesion8_naive_bayes_y_knn.md
+│   │   ├── 07_sesion9_segmentacion_clustering.md
+│   │   └── 08_sesion9_kmeans_y_jerarquico.md
 │   ├── metodos_numericos/          # Módulo de Regresión MCO e Interpolación de Lagrange
 │   │   └── presentacion_metodos_numericos.html
-│   ├── presentaciones/             # Diapositivas en formato PPTX
+│   ├── presentaciones/             # Diapositivas oficiales en formato estándar
 │   │   └── Hurto_y_Recuperacion_Vehiculos_Colombia.pptx
-│   └── figuras/                    # Galería de figuras analíticas en alta resolución
+│   └── figuras/                    # Galería de figuras analíticas en alta resolución (300 DPI)
+│
+├── notebooks/                      # Cuadernos Jupyter reproducibles organizados por etapas
+│   ├── README.md                   # Índice y descripción metodológica de los notebooks
+│   ├── 01_eda_exploratorio.ipynb
+│   ├── 02_transformacion_y_escalabilidad.ipynb
+│   ├── 03_sesion8_clasificacion_supervisada.ipynb
+│   ├── 04_sesion9_clustering_territorial.ipynb
+│   └── exploratorios/              # Cuadernos prototipo y de experimentación previa
+│       ├── analisis_datos_inicial.ipynb
+│       ├── clustering_experimental.ipynb
+│       └── modelos_clasificacion_v1.ipynb
 │
 └── scripts/                        # Scripts de automatización y despliegue
     ├── run_dashboard.sh            # Script bash para lanzamiento local
     ├── startup.sh                  # Entrypoint de configuración para nubes PaaS
-    ├── generar_figuras_sesion8.py
-    └── generar_figuras_sesion9.py
+    ├── app_snowflake.py            # Adaptador para Streamlit in Snowflake (SiS)
+    ├── generar_figuras_sesion8.py  # Generador de gráficos de clasificación
+    ├── generar_figuras_sesion9.py  # Generador de gráficos de clustering
+    └── util/                       # Utilidades internas de construcción
 ```
 
 ---
