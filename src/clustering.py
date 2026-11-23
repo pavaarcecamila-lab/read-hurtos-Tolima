@@ -266,8 +266,15 @@ class SegmentacionClustering:
         ax2.set_ylabel("Silueta Promedio (Mayor es mejor separación)", color=color_silueta, fontsize=11, fontweight="bold")
         ax2.tick_params(axis="y", labelcolor=color_silueta)
 
-        # Destacar k=3
-        ax1.axvline(x=3, color="#dc2626", linestyle=":", linewidth=2, label="k Óptimo Seleccionado (k=3)")
+        # Destacar k=4 (Solución oficial de 4 segmentos territoriales)
+        ax1.axvline(x=4, color="#dc2626", linestyle="--", linewidth=2.2, label="k Óptimo Seleccionado (k=4)")
+        ax1.plot(4, self.k_evaluacion.loc[self.k_evaluacion["k"] == 4, "inercia"].values[0],
+                 marker="o", markersize=10, color="#dc2626")
+        ax1.annotate("k=4: Codo Óptimo\n(4 Segmentos Tácticos)",
+                     xy=(4, self.k_evaluacion.loc[self.k_evaluacion["k"] == 4, "inercia"].values[0]),
+                     xytext=(4.3, self.k_evaluacion.loc[self.k_evaluacion["k"] == 4, "inercia"].values[0] + 8000),
+                     arrowprops=dict(facecolor="#dc2626", edgecolor="#dc2626", shrink=0.1, width=1.5, headwidth=6),
+                     fontsize=9.5, fontweight="bold", color="#991b1b")
 
         plt.title("Sesión 9 · Selección de k: Método del Codo y Coeficiente de Silueta",
                   fontsize=12, fontweight="bold", pad=12)
