@@ -442,40 +442,192 @@ elif "🌲 Clasificación" in seccion:
 
     st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
     
-    # Simulador Táctico
+    # ─────────────────────────────────────────────────────────────────────────
+    # SIMULADOR TÁCTICO INTERACTIVO DE PREDICCIÓN EN TIEMPO REAL
+    # ─────────────────────────────────────────────────────────────────────────
     st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-    st.markdown("<h4 style='margin:0 0 8px 0; color:#0F172A;'>🎮 Simulador Predictivo en Tiempo Real</h4>", unsafe_allow_html=True)
-    st.caption("Ajusta las variables de un municipio para consultar la inferencia en milisegundos con el modelo ganador:")
+    st.markdown("""
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div>
+            <h4 style="margin:0; color:#0F172A; font-size:1.2rem;">🎮 Simulador Predictivo Táctico en Tiempo Real</h4>
+            <p style="margin:4px 0 0 0; color:#64748B; font-size:0.88rem;">
+                Inferencia multicriterio: evalúa el riesgo criminal en milisegundos y compara el veredicto del Árbol contra KNN y Naive Bayes.
+            </p>
+        </div>
+        <span class="pill-win">⚡ INFERENCIA EN VIVO</span>
+    </div>
+    """, unsafe_allow_html=True)
     
+    # Presets de Escenarios Rápidos
+    escenarios = {
+        "🔴 Ibagué (Foco Crítico Metropolitano)": {"parque": 3500, "recup": 18, "dane": 73001, "desc": "Capital departamental: parque grande y masa de hurto activa concentrada en motocicletas."},
+        "🟡 Espinal (Cabecera Intermedia)": {"parque": 1200, "recup": 10, "dane": 73268, "desc": "Segunda ciudad del Tolima: riesgo moderado con alta afectación en motos."},
+        "☀️ Melgar (Corredor Turístico)": {"parque": 450, "recup": 6, "dane": 73449, "desc": "Municipio intermedio: tránsito foráneo y necesidad de retenes viales en festivos."},
+        "🟢 Alpujarra (Zona Rural Pacífica)": {"parque": 60, "recup": 1, "dane": 73034, "desc": "Municipio rural: bajo parque automotor y delincuencia vehicular prácticamente nula."},
+        "⚙️ Personalizado (Ajuste Manual)": {"parque": 2200, "recup": 8, "dane": 73001, "desc": "Configuración libre de parámetros para evaluar cualquier hipótesis táctica."}
+    }
+    
+    esc_sel = st.radio(
+        "📍 Seleccione un Escenario Táctico o personalice las variables:",
+        list(escenarios.keys()),
+        horizontal=True,
+        index=0
+    )
+    
+    vals_def = escenarios[esc_sel]
+    st.caption(f"💡 *{vals_def['desc']}*")
+    
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+    
+    # Sliders Interactivos
     sc1, sc2, sc3 = st.columns(3)
     with sc1:
-        s_anio = st.number_input("Año de Planificación:", 2024, 2030, 2026)
+        s_anio = st.slider("📅 Año de Planificación:", min_value=2024, max_value=2030, value=2026, step=1)
     with sc2:
-        s_parque = st.number_input("Parque Automotor Registrado:", 1, 250000, 2200)
+        s_parque = st.slider("🚗 Parque Automotor Registrado:", min_value=10, max_value=8500, value=vals_def["parque"], step=50)
     with sc3:
-        s_recup = st.number_input("Recuperaciones Históricas Previas:", 0, 5000, 8)
+        s_recup = st.slider("🛡️ Recuperaciones Históricas Previas:", min_value=0, max_value=50, value=vals_def["recup"], step=1)
         
-    if st.button("⚡ Ejecutar Inferencia de Riesgo", type="primary"):
-        vec = np.array([[s_anio, 73001, s_parque, s_recup]])
-        pred = models_data["tree_clf"].predict(vec)[0]
-        prob = models_data["tree_clf"].predict_proba(vec)[0][1]
+    s_dane = vals_def["dane"]
+    vec = np.array([[s_anio, s_dane, s_parque, s_recup]])
+    
+    # Inferencia en vivo con los 3 modelos del torneo
+    import time
+    
+    t0 = time.perf_counter()
+    pred_tree = int(models_data["tree_clf"].predict(vec)[0])
+    prob_tree = float(models_data["tree_clf"].predict_proba(vec)[0][1])
+    t_tree = (time.perf_counter() - t0) * 1000
+    
+    vec_sc = models_data["scaler_knn"].transform(vec)
+    t0 = time.perf_counter()
+    pred_knn = int(models_data["knn_clf"].predict(vec_sc)[0])
+    prob_knn = float(models_data["knn_clf"].predict_proba(vec_sc)[0][1])
+    t_knn = (time.perf_counter() - t0) * 1000
+    
+    t0 = time.perf_counter()
+    pred_gnb = int(models_data["gnb_clf"].predict(vec)[0])
+    prob_gnb = float(models_data["gnb_clf"].predict_proba(vec)[0][1])
+    t_gnb = (time.perf_counter() - t0) * 1000
+    
+    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+    
+    # Visualización: Tacómetro Gauge a la izquierda + Veredicto a la derecha
+    col_gauge, col_veredicto = st.columns([1.2, 1.8])
+    
+    with col_gauge:
+        color_barra = "#DC2626" if prob_tree >= 0.6 else ("#EAB308" if prob_tree >= 0.4 else "#16A34A")
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=prob_tree * 100,
+            number={"suffix": "%", "font": {"size": 34, "color": "#0F172A", "family": "Plus Jakarta Sans"}},
+            title={"text": "<b>NIVEL DE RIESGO DE HURTO</b><br><span style='color:#64748B; font-size:12px;'>Probabilidad inferida por Árbol de Decisión</span>", "font": {"size": 13}},
+            gauge={
+                "axis": {"range": [0, 100], "tickwidth": 1, "tickcolor": "#94A3B8"},
+                "bar": {"color": color_barra, "thickness": 0.3},
+                "bgcolor": "white",
+                "borderwidth": 1,
+                "bordercolor": "#E2E8F0",
+                "steps": [
+                    {"range": [0, 40], "color": "#ECFDF5"},
+                    {"range": [40, 60], "color": "#FEFCE8"},
+                    {"range": [60, 100], "color": "#FFF1F2"}
+                ],
+                "threshold": {
+                    "line": {"color": "#991B1B", "width": 4},
+                    "thickness": 0.8,
+                    "value": 50
+                }
+            }
+        ))
+        fig_gauge.update_layout(
+            height=250,
+            margin=dict(l=20, r=20, t=40, b=10),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)"
+        )
+        st.plotly_chart(fig_gauge, use_container_width=True)
         
-        if pred == 1:
-            render_alert_card(
-                titulo="🚨 ALERTA: MUNICIPIO EN CONDICIÓN DE HURTO ACTIVO",
-                probabilidad=f"{prob*100:.1f}%",
-                dictamen=f"La concentración del parque automotor ({s_parque:,}) supera el umbral crítico de exposición criminal.",
-                recomendacion="Asignación prioritaria de patrullaje por cuadrantes y puestos de control móvil.",
-                es_alerta=True
-            )
+    with col_veredicto:
+        if pred_tree == 1:
+            st.markdown(f"""
+            <div style="background:#FFF1F2; border:1px solid #FECDD3; border-left:5px solid #F43F5E; border-radius:12px; padding:16px; height:100%;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:800; color:#9F1239; font-size:1.05rem;">🚨 ALERTA: MUNICIPIO EN CONDICIÓN DE HURTO ACTIVO</span>
+                    <span class="pill-fail">RIESGO ALTO</span>
+                </div>
+                <div style="font-size:0.88rem; color:#881337; margin-top:8px; line-height:1.6;">
+                    • <b>Dictamen:</b> Con un parque de <b>{s_parque:,} vehículos</b> y <b>{s_recup} recuperaciones</b>, la masa delictiva supera el umbral crítico.<br>
+                    • <b>Plan Operativo:</b> Asignación prioritaria de patrullas por cuadrantes, activación de Plan Candado en salidas viales y fiscalización de talleres clandestinos.<br>
+                    • <b>Velocidad de Inferencia:</b> Calculado en apenas <b>{t_tree:.2f} ms</b> (viable para alertas en tiempo real).
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            render_alert_card(
-                titulo="✅ ZONA SEGURA: BAJO RIESGO DE HURTO VEHICULAR",
-                probabilidad=f"{prob*100:.1f}%",
-                dictamen="Municipio en rango de baja incidencia delictiva.",
-                recomendacion="Monitoreo preventivo ordinario.",
-                es_alerta=False
-            )
+            st.markdown(f"""
+            <div style="background:#ECFDF5; border:1px solid #A7F3D0; border-left:5px solid #10B981; border-radius:12px; padding:16px; height:100%;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:800; color:#065F46; font-size:1.05rem;">✅ ZONA SEGURA: BAJO RIESGO DE HURTO VEHICULAR</span>
+                    <span class="pill-win">RIESGO BAJO</span>
+                </div>
+                <div style="font-size:0.88rem; color:#064E3B; margin-top:8px; line-height:1.6;">
+                    • <b>Dictamen:</b> El parque de <b>{s_parque:,} vehículos</b> no alcanza el umbral de masa crítica que atrae bandas organizadas.<br>
+                    • <b>Plan Operativo:</b> Monitoreo preventivo ordinario y control de tránsito estacional en festividades.<br>
+                    • <b>Velocidad de Inferencia:</b> Calculado en <b>{t_tree:.2f} ms</b>.
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+    # Comparador en Vivo del Torneo de Modelos
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    st.markdown("<h5 style='margin:0 0 8px 0; color:#0F172A; font-size:0.95rem;'>⚔️ Veredicto Comparado del Torneo de Algoritmos (Tiempo de Inferencia vs Precisión):</h5>", unsafe_allow_html=True)
+    
+    cv1, cv2, cv3 = st.columns(3)
+    with cv1:
+        st.markdown(f"""
+        <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-top:3px solid #10B981; border-radius:10px; padding:12px; font-size:0.83rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <b>🌲 Árbol (Producción)</b>
+                <span style="color:#047857; font-weight:700;">🥇 GANADOR</span>
+            </div>
+            <div style="margin-top:6px; color:#334155;">
+                • Veredicto: <b style="color:{'#DC2626' if pred_tree==1 else '#16A34A'};">{'Hurto Activo' if pred_tree==1 else 'Zona Segura'}</b><br>
+                • Probabilidad: <b>{prob_tree*100:.1f}%</b><br>
+                • Latencia: <b style="color:#059669;">{t_tree:.2f} ms</b> (Inmediata)
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with cv2:
+        st.markdown(f"""
+        <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-top:3px solid #3B82F6; border-radius:10px; padding:12px; font-size:0.83rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <b>🎯 KNN (k=31 Escalado)</b>
+                <span style="color:#1D4ED8; font-weight:700;">🥈 SUB-CAMPEÓN</span>
+            </div>
+            <div style="margin-top:6px; color:#334155;">
+                • Veredicto: <b style="color:{'#DC2626' if pred_knn==1 else '#16A34A'};">{'Hurto Activo' if pred_knn==1 else 'Zona Segura'}</b><br>
+                • Probabilidad: <b>{prob_knn*100:.1f}%</b><br>
+                • Latencia: <b style="color:#D97706;">{t_knn:.2f} ms</b> (~{t_knn/max(t_tree, 0.001):.0f}× más lento)
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with cv3:
+        st.markdown(f"""
+        <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-top:3px solid #F43F5E; border-radius:10px; padding:12px; font-size:0.83rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <b>📊 Naive Bayes</b>
+                <span style="color:#BE123C; font-weight:700;">❌ DESCARTADO</span>
+            </div>
+            <div style="margin-top:6px; color:#334155;">
+                • Veredicto: <b style="color:{'#DC2626' if pred_gnb==1 else '#16A34A'};">{'Hurto Activo' if pred_gnb==1 else 'Zona Segura'}</b><br>
+                • Probabilidad: <b>{prob_gnb*100:.1f}%</b><br>
+                • Nota: Distorsión probabilística
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
     st.markdown("</div>", unsafe_allow_html=True)
 
 
