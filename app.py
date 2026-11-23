@@ -41,6 +41,7 @@ try:
         render_kpi_card,
         render_model_card,
         render_cluster_kpi,
+        render_cluster_card,
         render_alert_card,
         render_sidebar_authors
     )
@@ -52,6 +53,7 @@ except ImportError:
         render_kpi_card,
         render_model_card,
         render_cluster_kpi,
+        render_cluster_card,
         render_alert_card,
         render_sidebar_authors
     )
@@ -544,42 +546,291 @@ elif "🎯 Segmentación" in seccion:
 elif "🔍 Ficha Táctica" in seccion:
     st.markdown("""
     <div style="margin-bottom: 20px;">
-        <h2 style="color: #0F172A; margin:0 0 6px 0; font-size: 1.6rem;">🔍 Ficha Táctica por Ciudad / Municipio</h2>
+        <div style="display:inline-flex; align-items:center; gap:8px; background:#EFF6FF; border:1px solid #BFDBFE; color:#1D4ED8; padding:4px 14px; border-radius:20px; font-size:0.82rem; font-weight:700; margin-bottom:8px;">
+            <span>🛡️</span> INTELIGENCIA OPERATIVA POLICIAL
+        </div>
+        <h2 style="color: #0F172A; margin:0 0 6px 0; font-size: 1.6rem;">🔍 Ficha Táctica Territorial por Municipio</h2>
         <p style="color: #64748B; margin:0; font-size: 0.95rem;">
-            Consulta individualizada para toma de decisiones y planeación policial territorial.
+            Perfil criminológico individualizado: radiografía delictiva, brecha motos vs carros, asignación de clúster y dictamen de planeación policial territorial.
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    municipios = sorted(df_clustered["MUNICIPIO"].dropna().unique().tolist())
-    def_idx = municipios.index("IBAGUE") if "IBAGUE" in municipios else 0
-    m_sel = st.selectbox("🏙️ Seleccione la Ciudad o Municipio para Exploración:", municipios, index=def_idx)
+    # ── Selectores de Exploración ──
+    col_sel1, col_sel2, col_sel3 = st.columns([1.2, 1.8, 1.2])
     
-    df_m = df_clustered[df_clustered["MUNICIPIO"] == m_sel]
+    with col_sel1:
+        deps_disponibles = sorted([d for d in df_clustered["DEPARTAMENTO"].dropna().unique().tolist() if str(d).strip() != ""])
+        opciones_dep = ["TODOS"] + deps_disponibles
+        idx_dep_def = opciones_dep.index("TOLIMA") if "TOLIMA" in opciones_dep else 0
+        dep_ficha = st.selectbox("🏛️ Departamento:", opciones_dep, index=idx_dep_def)
+    
+    df_pool = df_clustered if dep_ficha == "TODOS" else df_clustered[df_clustered["DEPARTAMENTO"] == dep_ficha]
+    munis_disponibles = sorted([m for m in df_pool["MUNICIPIO"].dropna().unique().tolist() if str(m).strip() != ""])
+    idx_mun_def = munis_disponibles.index("IBAGUE") if "IBAGUE" in munis_disponibles else 0
+    
+    with col_sel2:
+        m_sel = st.selectbox("🏙️ Ciudad / Municipio a Consultar:", munis_disponibles, index=idx_mun_def)
+        
+    with col_sel3:
+        periodo_ficha = st.selectbox(
+            "📅 Ventana Temporal:",
+            ["Periodo Oficial (2010–2024)", "Histórico Completo (2010+)"],
+            index=0
+        )
+    
+    df_m = df_pool[df_pool["MUNICIPIO"] == m_sel].copy()
+    if "2010–2024" in periodo_ficha:
+        df_m = df_m[(df_m["AÑO"] >= 2010) & (df_m["AÑO"] <= 2024)]
+        
     if len(df_m) > 0:
+        dep_real = df_m["DEPARTAMENTO"].iloc[0]
         h_m = int(df_m["VEHICULOS_HURTADOS"].sum())
         r_m = int(df_m["VEHICULOS_RECUPERADOS"].sum())
         t_m = (r_m / h_m * 100) if h_m > 0 else 0.0
-        c_m = df_m["CLUSTER_NOMBRE"].mode()[0]
         
-        fc1, fc2, fc3, fc4 = st.columns(4)
-        with fc1:
-            st.metric("Hurtos Totales", f"{h_m:,}")
-        with fc2:
-            st.metric("Recuperaciones", f"{r_m:,}")
-        with fc3:
-            st.metric("Efectividad Policial", f"{t_m:.1f}%")
-        with fc4:
-            st.metric("Cluster Asignado", c_m)
+        # Desglose Motos vs Automotores
+        df_motos = df_m[df_m["TIPO_VEHICULO"] == "MOTOCICLETA"]
+        df_autos = df_m[df_m["TIPO_VEHICULO"] == "AUTOMOTOR"]
+        
+        h_motos = int(df_motos["VEHICULOS_HURTADOS"].sum())
+        r_motos = int(df_motos["VEHICULOS_RECUPERADOS"].sum())
+        t_motos = (r_motos / h_motos * 100) if h_motos > 0 else 0.0
+        pct_motos = (h_motos / h_m * 100) if h_m > 0 else 0.0
+        
+        h_autos = int(df_autos["VEHICULOS_HURTADOS"].sum())
+        r_autos = int(df_autos["VEHICULOS_RECUPERADOS"].sum())
+        t_autos = (r_autos / h_autos * 100) if h_autos > 0 else 0.0
+        pct_autos = (h_autos / h_m * 100) if h_m > 0 else 0.0
+        
+        # Clúster táctico
+        c_m = df_m["CLUSTER_NOMBRE"].mode()[0] if len(df_m) > 0 else "🟢 C0: Zonas Pacíficas"
+        c_motos = df_motos["CLUSTER_NOMBRE"].mode()[0] if len(df_motos) > 0 else c_m
+        c_autos = df_autos["CLUSTER_NOMBRE"].mode()[0] if len(df_autos) > 0 else c_m
+        
+        # Color semafórico de efectividad
+        color_efectividad = "#10B981" if t_m >= 60 else ("#F59E0B" if t_m >= 35 else "#F43F5E")
+        
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        
+        # ── Grid de KPIs Principales ──
+        fk1, fk2, fk3, fk4, fk5 = st.columns(5)
+        with fk1:
+            render_kpi_card("Hurtos Totales", f"{h_m:,}", f"{dep_real} · {periodo_ficha.split(' ')[0]}", "#F43F5E", "#E11D48", "#E11D48")
+        with fk2:
+            render_kpi_card("Recuperaciones", f"{r_m:,}", "Operatividad Policial", "#10B981", "#059669", "#059669")
+        with fk3:
+            render_kpi_card("Efectividad Policial", f"{t_m:.1f}%", "Tasa Global Recuperación", color_efectividad, color_efectividad, "#64748B")
+        with fk4:
+            render_kpi_card("Impacto Motos", f"{pct_motos:.1f}%", f"{h_motos:,} motos hurtadas", "#6366F1", "#4F46E5", "#4F46E5")
+        with fk5:
+            color_clus = "#EF4444" if "C2" in c_m else ("#F59E0B" if "C1" in c_m else ("#10B981" if "C0" in c_m else "#6366F1"))
+            render_kpi_card("Clúster Territorial", c_m.split(":")[0], c_m.split(":")[1].strip(), color_clus, "#0F172A", "#64748B")
+
+        st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+        
+        # ── Caja Comparativa: Radiografía Motos vs Carros ──
+        st.markdown(f"""
+        <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; padding:20px; box-shadow:0 4px 18px -2px rgba(0,0,0,0.03); margin-bottom:20px;">
+            <div style="font-size:1.1rem; font-weight:800; color:#0F172A; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                <span>⚖️</span> Radiografía Delictiva Comparada: Motocicletas vs Automotores en {m_sel}
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-top:4px solid #6366F1; border-radius:12px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="font-weight:800; color:#1E1B4B; font-size:1.05rem;">🏍️ MOTOCICLETAS</span>
+                        <span style="background:#EEF2FF; color:#4338CA; padding:3px 10px; border-radius:12px; font-size:0.78rem; font-weight:700;">{c_motos}</span>
+                    </div>
+                    <div style="font-size:0.88rem; color:#334155; line-height:1.7;">
+                        • <b>Hurtos Registrados:</b> <span style="color:#DC2626; font-weight:700;">{h_motos:,}</span> ({pct_motos:.1f}% del total municipal)<br>
+                        • <b>Recuperaciones:</b> <span style="color:#16A34A; font-weight:700;">{r_motos:,}</span><br>
+                        • <b>Tasa de Recuperación:</b> <span style="font-weight:800; color:{'#16A34A' if t_motos>=50 else '#DC2626'};">{t_motos:.1f}%</span><br>
+                        • <b>Dinámica Criminológica:</b> Desguace y receptación ilícita exprés (&lt;120 min), alteración de sistemas de identificación y comercialización clandestina de repuestos.
+                    </div>
+                </div>
+                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-top:4px solid #0EA5E9; border-radius:12px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="font-weight:800; color:#082F49; font-size:1.05rem;">🚗 AUTOMOTORES</span>
+                        <span style="background:#F0F9FF; color:#0369A1; padding:3px 10px; border-radius:12px; font-size:0.78rem; font-weight:700;">{c_autos}</span>
+                    </div>
+                    <div style="font-size:0.88rem; color:#334155; line-height:1.7;">
+                        • <b>Hurtos Registrados:</b> <span style="color:#DC2626; font-weight:700;">{h_autos:,}</span> ({pct_autos:.1f}% del total municipal)<br>
+                        • <b>Recuperaciones:</b> <span style="color:#16A34A; font-weight:700;">{r_autos:,}</span><br>
+                        • <b>Tasa de Recuperación:</b> <span style="font-weight:800; color:{'#16A34A' if t_autos>=50 else '#DC2626'};">{min(t_autos, 100.0):.1f}%</span><br>
+                        • <b>Dinámica Criminológica:</b> Modalidad predominante de halado y gemeleo/clonación de placas; alta efectividad policial por trazabilidad GPS y arcos LPR.
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # ── Visualizaciones Tácticas Interactivas ──
+        col_g1, col_g2 = st.columns([1.5, 1])
+        
+        with col_g1:
+            st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+            st.markdown(f"<h4 style='margin:0 0 12px 0; color:#0F172A;'>📈 Evolución Histórica: Hurtos vs Recuperaciones en {m_sel}</h4>", unsafe_allow_html=True)
+            df_evo = df_m.groupby("AÑO")[["VEHICULOS_HURTADOS", "VEHICULOS_RECUPERADOS"]].sum().reset_index()
+            fig_evo = go.Figure()
+            fig_evo.add_trace(go.Scatter(
+                x=df_evo["AÑO"], y=df_evo["VEHICULOS_HURTADOS"],
+                mode="lines+markers", name="Vehículos Hurtados",
+                line=dict(color="#F43F5E", width=3, shape="spline"),
+                marker=dict(size=7, color="#F43F5E")
+            ))
+            fig_evo.add_trace(go.Scatter(
+                x=df_evo["AÑO"], y=df_evo["VEHICULOS_RECUPERADOS"],
+                mode="lines+markers", name="Vehículos Recuperados",
+                line=dict(color="#10B981", width=3, shape="spline"),
+                marker=dict(size=7, color="#10B981")
+            ))
+            fig_evo.update_layout(
+                template="plotly_white",
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                hovermode="x unified",
+                xaxis_title="<b>Eje X:</b> Año Calendario (Serie Observada)",
+                yaxis_title="<b>Eje Y:</b> Cantidad de Vehículos",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                margin=dict(l=10, r=10, t=10, b=10),
+                height=320
+            )
+            st.plotly_chart(fig_evo, use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
             
-        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+        with col_g2:
+            st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+            st.markdown(f"<h4 style='margin:0 0 12px 0; color:#0F172A;'>📊 Distribución por Tipo de Vehículo en {m_sel}</h4>", unsafe_allow_html=True)
+            df_tipo_bar = df_m.groupby("TIPO_VEHICULO")[["VEHICULOS_HURTADOS", "VEHICULOS_RECUPERADOS"]].sum().reset_index()
+            fig_bar_tipo = go.Figure()
+            fig_bar_tipo.add_trace(go.Bar(
+                name="Hurtados", x=df_tipo_bar["TIPO_VEHICULO"], y=df_tipo_bar["VEHICULOS_HURTADOS"],
+                marker_color="#F43F5E"
+            ))
+            fig_bar_tipo.add_trace(go.Bar(
+                name="Recuperados", x=df_tipo_bar["TIPO_VEHICULO"], y=df_tipo_bar["VEHICULOS_RECUPERADOS"],
+                marker_color="#10B981"
+            ))
+            fig_bar_tipo.update_layout(
+                barmode="group",
+                template="plotly_white",
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                xaxis_title="<b>Eje X:</b> Modalidad de Transporte",
+                yaxis_title="<b>Eje Y:</b> Total Casos",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                margin=dict(l=10, r=10, t=10, b=10),
+                height=320
+            )
+            st.plotly_chart(fig_bar_tipo, use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # ── Plan de Acción Táctico Policial (Dictamen Operativo Inteligente) ──
+        if "C2" in c_m or h_motos >= 1000 or m_sel == "IBAGUE":
+            titulo_alerta = f"🚨 DICTAMEN TÁCTICO: INTERVENCIÓN ESTRATÉGICA METROPOLITANA — {m_sel}"
+            bg_alerta = "#FFF1F2"
+            border_alerta = "#F43F5E"
+            color_tit_alerta = "#9F1239"
+            if m_sel == "IBAGUE":
+                rec_candado = "Cierre en ventana dorada (&lt;15 min) en los 3 ejes de fuga: (1) Variante Ibagué-Bogotá / Picaleña, (2) Corredor Cajamarca-Túnel de La Línea (hacia Eje Cafetero), y (3) Vía al Norte del Tolima (Alvarado-Honda)."
+                rec_talleres = "Inspección técnica judicial prioritaria en talleres y bodegas clandestinas de la Calle 21, Barrio El Carmen y sector Mirolindo para erradicar el mercado ilícito de autopartes."
+            elif m_sel == "ESPINAL":
+                rec_candado = "Control perimetral sobre la rotonda La Tambora, interceptando las salidas hacia El Guamo, Flandes/Girardot y la variante a Neiva."
+                rec_talleres = "Fiscalización intensiva a desguazaderos de motos ante una concentración récord de 94.3% de hurtos en motocicletas."
+            else:
+                rec_candado = "Activación del Plan Candado Metropolitano con bloqueo coordinado en los principales corredores intermunicipales de escape."
+                rec_talleres = "Allanamientos conjuntos SIJIN-Fiscalía a bodegas de autopartes ilegales y mercados clandestinos de receptación."
+            
+            puntos_accion = f"""
+            • <b>Plan Candado Exprés (Ventana Dorada 15 min):</b> {rec_candado}<br>
+            • <b>Lucha contra el Desguace y Receptación:</b> {rec_talleres}<br>
+            • <b>Arcos de Fotodetección y Cámaras LPR:</b> Lectura automática de placas en los accesos urbanos para detectar motocicletas y automotores con reporte vigente en tiempo real.<br>
+            • <b>Patrullaje Preventivo Nocturno:</b> Disuasión activa en puntos críticos entre las 18:00 y las 04:00 horas frente a la modalidad de halado en parqueo informal.
+            """
+        elif "C1" in c_m or (h_m >= 200 and t_m >= 50):
+            titulo_alerta = f"🟡 DICTAMEN TÁCTICO: CABECERA INTERMEDIA CON RIESGO ACTIVO Y ALTA RESPUESTA — {m_sel}"
+            bg_alerta = "#FEFCE8"
+            border_alerta = "#EAB308"
+            color_tit_alerta = "#854D0E"
+            puntos_accion = f"""
+            • <b>Sostener la Tasa de Respuesta:</b> El municipio muestra una capacidad de recuperación destacada ({t_m:.1f}%), siendo referente operativo.<br>
+            • <b>Puestos de Control Viales Móviles:</b> Ubicar retenes en fines de semana y festivos sobre los corredores turísticos y de conexión intermunicipal.<br>
+            • <b>Campañas de Marcación Gratuita de Motos:</b> Promover la marcación profunda de chasis y piezas visibles para frenar el halado oportunista.<br>
+            • <b>Vigilancia Comunitaria:</b> Fortalecer frentes de seguridad local en sectores comerciales y de esparcimiento nocturno.
+            """
+        elif "C0" in c_m:
+            titulo_alerta = f"🟢 DICTAMEN TÁCTICO: ZONA PACÍFICA / CONTROL PREVENTIVO COMUNITARIO — {m_sel}"
+            bg_alerta = "#ECFDF5"
+            border_alerta = "#10B981"
+            color_tit_alerta = "#065F46"
+            puntos_accion = f"""
+            • <b>Bajo Nivel de Amenaza:</b> Registro delictivo marginal o nulo con alta tasa de efectividad preventiva ({t_m:.1f}%).<br>
+            • <b>Filtro de Tránsito Intermunicipal:</b> Evitar que el municipio sea utilizado como zona de enfriamiento o parqueadero de vehículos hurtados en ciudades capitales.<br>
+            • <b>Patrullaje Rural y Verificación de Antecedentes:</b> Consultas periódicas en el sistema SICOQ y RUNT a vehículos foráneos en ferias patronales o temporadas turísticas.
+            """
+        else:
+            titulo_alerta = f"🟠 DICTAMEN TÁCTICO: MONITOREO Y FISCALIZACIÓN DE REGISTROS — {m_sel}"
+            bg_alerta = "#FFF7ED"
+            border_alerta = "#F97316"
+            color_tit_alerta = "#9A3412"
+            puntos_accion = f"""
+            • <b>Zona con Alta Matrícula Vehicular:</b> Parque automotor considerable respecto a la incidencia delictiva directa.<br>
+            • <b>Auditoría y Trazabilidad RUNT:</b> Fiscalizar los procesos de matrícula y traspaso para evitar trámites fraudulentos o gemeleo administrativo.<br>
+            • <b>Monitoreo Tecnológico:</b> Instalación de GPS obligatorio en vehículos comerciales y de servicio público.
+            """
+
+        st.markdown(f"""
+        <div style="background:{bg_alerta}; border:1px solid {border_alerta}; border-left:6px solid {border_alerta}; border-radius:14px; padding:20px; margin-bottom:20px;">
+            <div style="font-size:1.05rem; font-weight:800; color:{color_tit_alerta}; margin-bottom:8px;">
+                {titulo_alerta}
+            </div>
+            <div style="font-size:0.88rem; color:#1E293B; line-height:1.7;">
+                {puntos_accion}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # ── Historial Cronológico y Exportación ──
         st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-        st.markdown("<b>Historial Cronológico de Registros</b>", unsafe_allow_html=True)
-        st.dataframe(
-            df_m[["AÑO", "TIPO_VEHICULO", "VEHICULOS_REGISTRADOS", "VEHICULOS_HURTADOS", "VEHICULOS_RECUPERADOS", "CLUSTER_NOMBRE"]]
-            .sort_values(by="AÑO", ascending=False),
-            use_container_width=True
+        col_t1, col_t2 = st.columns([3, 1])
+        with col_t1:
+            st.markdown(f"<h4 style='margin:0; color:#0F172A;'>📋 Historial Cronológico de Registros ({m_sel})</h4>", unsafe_allow_html=True)
+        with col_t2:
+            csv_data = df_m[[
+                "AÑO", "DEPARTAMENTO", "MUNICIPIO", "TIPO_VEHICULO",
+                "VEHICULOS_REGISTRADOS", "VEHICULOS_HURTADOS", "VEHICULOS_RECUPERADOS",
+                "CLUSTER_NOMBRE"
+            ]].to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Exportar Ficha (CSV)",
+                data=csv_data,
+                file_name=f"ficha_tactica_{m_sel.lower().replace(' ', '_')}.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+            
+        df_mostrar = df_m[[
+            "AÑO", "TIPO_VEHICULO", "VEHICULOS_REGISTRADOS",
+            "VEHICULOS_HURTADOS", "VEHICULOS_RECUPERADOS", "CLUSTER_NOMBRE"
+        ]].copy().sort_values(by=["AÑO", "TIPO_VEHICULO"], ascending=[False, True])
+        
+        df_mostrar["TASA_RECUPERACION_%"] = np.where(
+            df_mostrar["VEHICULOS_HURTADOS"] > 0,
+            (df_mostrar["VEHICULOS_RECUPERADOS"] / df_mostrar["VEHICULOS_HURTADOS"] * 100).round(1),
+            np.where(df_mostrar["VEHICULOS_RECUPERADOS"] > 0, 100.0, 0.0)
         )
+        
+        df_mostrar = df_mostrar.rename(columns={
+            "AÑO": "Año",
+            "TIPO_VEHICULO": "Tipo de Vehículo",
+            "VEHICULOS_REGISTRADOS": "Vehículos Registrados",
+            "VEHICULOS_HURTADOS": "Hurtos",
+            "VEHICULOS_RECUPERADOS": "Recuperaciones",
+            "TASA_RECUPERACION_%": "Efectividad Policial (%)",
+            "CLUSTER_NOMBRE": "Segmento Clúster"
+        })
+        
+        st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
 

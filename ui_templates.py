@@ -85,6 +85,21 @@ def render_model_card(pill_class: str, pill_text: str, title: str, subtitle: str
         st.markdown(html, unsafe_allow_html=True)
 
 
+def render_cluster_card(nombre_cluster: str, volumen: str, hurtos_prom: str, recup_prom: str, estrategia: str, color_borde: str = "#0EA5E9"):
+    """Renderiza una tarjeta descriptiva de cluster desde templates/cluster_card.html."""
+    plantilla = _leer_archivo(TEMPLATES_DIR / "cluster_card.html")
+    if plantilla:
+        html = plantilla.format(
+            nombre_cluster=nombre_cluster,
+            volumen=volumen,
+            hurtos_prom=hurtos_prom,
+            recup_prom=recup_prom,
+            estrategia=estrategia,
+            color_borde=color_borde
+        )
+        st.markdown(html, unsafe_allow_html=True)
+
+
 def render_cluster_kpi(tag: str, nombre: str, porcentaje: str, registros: str, hurto_prom: str, recup_prom: str, color_borde: str, bg_color: str = "#FFFFFF", title_color: str = "#0F172A", sub_color: str = "#64748B"):
     """Renderiza la tarjeta KPI de cluster desde templates/cluster_kpi.html."""
     plantilla = _leer_archivo(TEMPLATES_DIR / "cluster_kpi.html")
