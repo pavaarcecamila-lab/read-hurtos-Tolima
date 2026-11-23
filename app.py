@@ -98,6 +98,26 @@ def cargar_datos():
     df["TASA_RECUPERACION"] = df["TASA_RECUPERACION"].clip(upper=100.0)
     return df
 
+
+@st.cache_data
+def cargar_datos_cluster():
+    candidatos = [
+        Path(__file__).resolve().parent / "dataset/dataset_con_clusters.csv",
+        Path("dataset/dataset_con_clusters.csv"),
+        Path("read-hurtos-Tolima/dataset/dataset_con_clusters.csv"),
+    ]
+    ruta = next((c for c in candidatos if c.exists()), None)
+    if not ruta:
+        return None
+    df = pd.read_csv(ruta)
+    df["TASA_RECUPERACION"] = np.where(
+        df["VEHICULOS_HURTADOS"] > 0,
+        (df["VEHICULOS_RECUPERADOS"] / df["VEHICULOS_HURTADOS"]) * 100,
+        np.where(df["VEHICULOS_RECUPERADOS"] > 0, 100.0, 0.0)
+    )
+    df["TASA_RECUPERACION"] = df["TASA_RECUPERACION"].clip(upper=100.0)
+    return df
+
 df_raw = cargar_datos()
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -252,6 +272,7 @@ seccion = st.radio(
         "🎯 Segmentación Territorial (K-Means & Jerárquico)",
         "🔍 Ficha Táctica Municipal (Seleccionar Ciudad)",
         "📐 Métodos Numéricos (Regresión & Lagrange)",
+        "📂 Base de Datos Final (Explorador & Descargas)",
         "📑 Conclusiones & Recomendaciones"
     ],
     horizontal=False,
@@ -1005,6 +1026,191 @@ elif "📐 Métodos Numéricos" in seccion:
         components.html(html_content, height=1350, scrolling=True)
     else:
         st.error("No se encontró el archivo de presentación HTML.")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECCIÓN 5b: BASE DE DATOS FINAL — EXPLORADOR & DESCARGAS
+# ─────────────────────────────────────────────────────────────────────────────
+elif "📂 Base de Datos Final" in seccion:
+    st.markdown("""
+    <div style="margin-bottom: 20px;">
+        <h2 style="color: #0F172A; margin:0 0 6px 0; font-size: 1.6rem;">
+            📂 Explorador Oficial de la Base de Datos Final
+        </h2>
+        <p style="color: #64748B; margin:0; font-size: 0.95rem;">
+            Repositorio consolidado del estudio · Fuentes: SIEDCO · RUNT · Policía Nacional · 2010–2024
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Cargar ambas versiones ──────────────────────────────────────────────
+    df_cluster = cargar_datos_cluster()
+    df_integrado = df_raw.copy()
+
+    # ── Selector de versión ─────────────────────────────────────────────────
+    version = st.radio(
+        "🗂️ Versión de la Base de Datos:",
+        [
+            "⭐ Dataset Enriquecido con Clústeres K-Means (10 variables)",
+            "📋 Dataset Integrado Completo (8 variables — histórico sin clustering)"
+        ],
+        horizontal=True,
+        index=0
+    )
+
+    df_bd = df_cluster if (df_cluster is not None and "⭐" in version) else df_integrado
+
+    # ── KPI Cards superiores ────────────────────────────────────────────────
+    total_filas    = len(df_bd)
+    total_munis    = df_bd["MUNICIPIO"].nunique()
+    total_deptos   = df_bd["DEPARTAMENTO"].nunique()
+    total_vars     = len(df_bd.columns)
+    rango_anios    = f"{int(df_bd['AÑO'].min())} – {int(df_bd['AÑO'].max())}"
+
+    k1, k2, k3, k4, k5 = st.columns(5)
+    kpi_style = "background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:14px 10px; text-align:center;"
+    for col, num, lbl, color in [
+        (k1, f"{total_filas:,}",   "📄 Registros Totales",  "#0EA5E9"),
+        (k2, f"{total_munis:,}",   "🏙️ Municipios",         "#10B981"),
+        (k3, f"{total_deptos}",    "🗺️ Departamentos",      "#6366F1"),
+        (k4, f"{total_vars}",      "📊 Variables",          "#F59E0B"),
+        (k5, rango_anios,          "📅 Rango de Años",      "#EC4899"),
+    ]:
+        col.markdown(f"""
+<div style="{kpi_style}">
+  <div style="font-size:1.5rem; font-weight:700; color:{color};">{num}</div>
+  <div style="font-size:0.78rem; color:#64748B; margin-top:4px;">{lbl}</div>
+</div>""", unsafe_allow_html=True)
+
+    st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
+
+    # ── Filtros interactivos ────────────────────────────────────────────────
+    st.markdown("#### 🔎 Filtros de Exploración", unsafe_allow_html=False)
+    fc1, fc2, fc3, fc4 = st.columns([2, 2, 1.5, 1.5])
+
+    deptos_disp = ["TODOS"] + sorted(df_bd["DEPARTAMENTO"].dropna().unique().tolist())
+    depto_sel   = fc1.selectbox("🗺️ Departamento:", deptos_disp, index=0)
+
+    if depto_sel == "TODOS":
+        df_tmp = df_bd
+    else:
+        df_tmp = df_bd[df_bd["DEPARTAMENTO"] == depto_sel]
+
+    munis_disp = ["TODOS"] + sorted(df_tmp["MUNICIPIO"].dropna().unique().tolist())
+    muni_sel   = fc2.selectbox("🏙️ Municipio:", munis_disp, index=0)
+
+    tipos_disp = ["TODOS", "MOTOCICLETA", "AUTOMOTOR"]
+    tipo_sel   = fc3.selectbox("🚗 Tipo de Vehículo:", tipos_disp, index=0)
+
+    anio_min = int(df_bd["AÑO"].min())
+    anio_max = int(df_bd["AÑO"].max())
+    # Clamp sensible default for slider
+    slider_min = max(2010, anio_min)
+    anio_range = fc4.slider("📅 Rango Año:", min_value=anio_min, max_value=anio_max,
+                             value=(slider_min, anio_max), step=1)
+
+    # Aplicar filtros
+    df_filtro_bd = df_bd.copy()
+    if depto_sel != "TODOS":
+        df_filtro_bd = df_filtro_bd[df_filtro_bd["DEPARTAMENTO"] == depto_sel]
+    if muni_sel != "TODOS":
+        df_filtro_bd = df_filtro_bd[df_filtro_bd["MUNICIPIO"] == muni_sel]
+    if tipo_sel != "TODOS":
+        df_filtro_bd = df_filtro_bd[df_filtro_bd["TIPO_VEHICULO"] == tipo_sel]
+    df_filtro_bd = df_filtro_bd[
+        (df_filtro_bd["AÑO"] >= anio_range[0]) &
+        (df_filtro_bd["AÑO"] <= anio_range[1])
+    ]
+
+    # ── Conteo de resultados ────────────────────────────────────────────────
+    n_filtrados = len(df_filtro_bd)
+    pct = (n_filtrados / total_filas * 100) if total_filas > 0 else 0
+    st.info(f"📌 **{n_filtrados:,} registros** encontrados con los filtros aplicados ({pct:.1f}% del total)")
+
+    # ── Renombrado legible de columnas para visualización ───────────────────
+    rename_map = {
+        "AÑO":                   "Año",
+        "CODIGO_DANE_MUNICIPIO": "Código DANE",
+        "DEPARTAMENTO":          "Departamento",
+        "MUNICIPIO":             "Municipio",
+        "TIPO_VEHICULO":         "Tipo Vehículo",
+        "VEHICULOS_REGISTRADOS": "Registrados",
+        "VEHICULOS_HURTADOS":    "Hurtados",
+        "VEHICULOS_RECUPERADOS": "Recuperados",
+        "TASA_RECUPERACION":     "Tasa Recup. (%)",
+        "CLUSTER_KMEANS":        "Clúster ID",
+        "SEGMENTO_ESTRATEGICO":  "Segmento Estratégico"
+    }
+    df_display = df_filtro_bd.rename(columns={k: v for k, v in rename_map.items() if k in df_filtro_bd.columns})
+
+    # Formatear columnas numéricas
+    for col_num in ["Registrados", "Hurtados", "Recuperados"]:
+        if col_num in df_display.columns:
+            df_display[col_num] = df_display[col_num].apply(lambda x: f"{int(x):,}" if pd.notna(x) else "—")
+    if "Tasa Recup. (%)" in df_display.columns:
+        df_display["Tasa Recup. (%)"] = df_display["Tasa Recup. (%)"].apply(
+            lambda x: f"{x:.1f}%" if pd.notna(x) else "—"
+        )
+
+    # ── Tabla interactiva ───────────────────────────────────────────────────
+    st.dataframe(
+        df_display.reset_index(drop=True),
+        use_container_width=True,
+        height=430
+    )
+
+    # ── Botones de descarga ─────────────────────────────────────────────────
+    st.markdown("#### 📥 Descargas Oficiales", unsafe_allow_html=False)
+    dl1, dl2, dl3 = st.columns(3)
+
+    csv_filtrado = df_filtro_bd.to_csv(index=False).encode("utf-8")
+    dl1.download_button(
+        label="📥 Descargar Datos Filtrados",
+        data=csv_filtrado,
+        file_name="datos_filtrados.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+
+    if df_cluster is not None:
+        csv_cluster = df_cluster.to_csv(index=False).encode("utf-8")
+        dl2.download_button(
+            label="⭐ Descargar Dataset con Clústeres",
+            data=csv_cluster,
+            file_name="dataset_con_clusters.csv",
+            mime="text/csv",
+            use_container_width=True
+        )
+
+    csv_integrado = df_integrado.to_csv(index=False).encode("utf-8")
+    dl3.download_button(
+        label="📋 Descargar Dataset Integrado Completo",
+        data=csv_integrado,
+        file_name="dataset_integrado.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+
+    # ── Mini-resumen estadístico ────────────────────────────────────────────
+    if n_filtrados > 0:
+        st.markdown("#### 📊 Resumen Estadístico de los Datos Filtrados")
+        stat_cols = [c for c in ["VEHICULOS_HURTADOS","VEHICULOS_RECUPERADOS","VEHICULOS_REGISTRADOS","TASA_RECUPERACION"]
+                     if c in df_filtro_bd.columns]
+        stat_df = df_filtro_bd[stat_cols].describe().T.round(2)
+        stat_df.index = [rename_map.get(i, i) for i in stat_df.index]
+        st.dataframe(stat_df, use_container_width=True)
+
+    # ── Nota técnica ────────────────────────────────────────────────────────
+    st.markdown("""
+<div style="background:#F0FDF4; border-left:4px solid #10B981; padding:12px 16px; border-radius:8px; margin-top:16px;">
+  <b style="color:#065F46;">ℹ️ Nota Técnica sobre los Datos</b><br>
+  <span style="color:#334155; font-size:0.88rem;">
+    <b>Fuentes:</b> SIEDCO (Policía Nacional), RUNT (Min. Transporte), Parque Automotor (DANE) · 
+    <b>Período:</b> 2010–2024 · <b>Cobertura:</b> Nacional (33 departamentos, 1,153+ municipios) · 
+    <b>Clustering:</b> K-Means k=4 · Silhouette Score = 0.7748 · Validado con Clustering Jerárquico (Ward).
+  </span>
+</div>
+""", unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
