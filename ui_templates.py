@@ -152,3 +152,39 @@ def render_sidebar_authors():
     plantilla = _leer_archivo(TEMPLATES_DIR / "sidebar_authors.html")
     if plantilla:
         st.markdown(plantilla, unsafe_allow_html=True)
+
+
+def render_tactical_comparison(m_sel: str, c_motos: str, h_motos: str, pct_motos: str, r_motos: str, t_motos: str, color_t_motos: str, c_autos: str, h_autos: str, pct_autos: str, r_autos: str, t_autos: str, color_t_autos: str):
+    """Renderiza la caja comparativa Motos vs Carros desde templates/tactical_comparison.html."""
+    plantilla = _leer_archivo(TEMPLATES_DIR / "tactical_comparison.html")
+    if plantilla:
+        html = plantilla.format(
+            m_sel=m_sel,
+            c_motos=c_motos,
+            h_motos=h_motos,
+            pct_motos=pct_motos,
+            r_motos=r_motos,
+            t_motos=t_motos,
+            color_t_motos=color_t_motos,
+            c_autos=c_autos,
+            h_autos=h_autos,
+            pct_autos=pct_autos,
+            r_autos=r_autos,
+            t_autos=t_autos,
+            color_t_autos=color_t_autos
+        )
+        st.markdown(html, unsafe_allow_html=True)
+
+
+def render_tactical_alert(bg_alerta: str, border_alerta: str, color_tit_alerta: str, titulo_alerta: str, puntos_html: str):
+    """Renderiza el dictamen táctico policial desde templates/tactical_alert.html sin sangría Markdown."""
+    plantilla = _leer_archivo(TEMPLATES_DIR / "tactical_alert.html")
+    if plantilla:
+        html = plantilla.format(
+            bg_alerta=bg_alerta,
+            border_alerta=border_alerta,
+            color_tit_alerta=color_tit_alerta,
+            titulo_alerta=titulo_alerta,
+            puntos_html=puntos_html
+        )
+        st.markdown(html, unsafe_allow_html=True)

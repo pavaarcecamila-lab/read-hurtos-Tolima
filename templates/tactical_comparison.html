@@ -1,0 +1,31 @@
+<div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; padding:20px; box-shadow:0 4px 18px -2px rgba(0,0,0,0.03); margin-bottom:20px;">
+    <div style="font-size:1.1rem; font-weight:800; color:#0F172A; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+        <span>⚖️</span> Radiografía Delictiva Comparada: Motocicletas vs Automotores en {m_sel}
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-top:4px solid #6366F1; border-radius:12px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-weight:800; color:#1E1B4B; font-size:1.05rem;">🏍️ MOTOCICLETAS</span>
+                <span style="background:#EEF2FF; color:#4338CA; padding:3px 10px; border-radius:12px; font-size:0.78rem; font-weight:700;">{c_motos}</span>
+            </div>
+            <div style="font-size:0.88rem; color:#334155; line-height:1.7;">
+                • <b>Hurtos Registrados:</b> <span style="color:#DC2626; font-weight:700;">{h_motos}</span> ({pct_motos}% del total municipal)<br>
+                • <b>Recuperaciones:</b> <span style="color:#16A34A; font-weight:700;">{r_motos}</span><br>
+                • <b>Tasa de Recuperación:</b> <span style="font-weight:800; color:{color_t_motos};">{t_motos}%</span><br>
+                • <b>Dinámica Criminológica:</b> Desguace y receptación ilícita exprés (&lt;120 min), alteración de sistemas de identificación y comercialización clandestina de repuestos.
+            </div>
+        </div>
+        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-top:4px solid #0EA5E9; border-radius:12px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-weight:800; color:#082F49; font-size:1.05rem;">🚗 AUTOMOTORES</span>
+                <span style="background:#F0F9FF; color:#0369A1; padding:3px 10px; border-radius:12px; font-size:0.78rem; font-weight:700;">{c_autos}</span>
+            </div>
+            <div style="font-size:0.88rem; color:#334155; line-height:1.7;">
+                • <b>Hurtos Registrados:</b> <span style="color:#DC2626; font-weight:700;">{h_autos}</span> ({pct_autos}% del total municipal)<br>
+                • <b>Recuperaciones:</b> <span style="color:#16A34A; font-weight:700;">{r_autos}</span><br>
+                • <b>Tasa de Recuperación:</b> <span style="font-weight:800; color:{color_t_autos};">{t_autos}%</span><br>
+                • <b>Dinámica Criminológica:</b> Modalidad predominante de halado y gemeleo/clonación de placas; alta efectividad policial por trazabilidad GPS y arcos LPR.
+            </div>
+        </div>
+    </div>
+</div>

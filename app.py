@@ -43,7 +43,9 @@ try:
         render_cluster_kpi,
         render_cluster_card,
         render_alert_card,
-        render_sidebar_authors
+        render_sidebar_authors,
+        render_tactical_comparison,
+        render_tactical_alert
     )
 except ImportError:
     from src.ui_templates import (
@@ -55,7 +57,9 @@ except ImportError:
         render_cluster_kpi,
         render_cluster_card,
         render_alert_card,
-        render_sidebar_authors
+        render_sidebar_authors,
+        render_tactical_comparison,
+        render_tactical_alert
     )
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -630,39 +634,21 @@ elif "🔍 Ficha Táctica" in seccion:
         st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
         
         # ── Caja Comparativa: Radiografía Motos vs Carros ──
-        st.markdown(f"""
-        <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; padding:20px; box-shadow:0 4px 18px -2px rgba(0,0,0,0.03); margin-bottom:20px;">
-            <div style="font-size:1.1rem; font-weight:800; color:#0F172A; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-                <span>⚖️</span> Radiografía Delictiva Comparada: Motocicletas vs Automotores en {m_sel}
-            </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-top:4px solid #6366F1; border-radius:12px; padding:16px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <span style="font-weight:800; color:#1E1B4B; font-size:1.05rem;">🏍️ MOTOCICLETAS</span>
-                        <span style="background:#EEF2FF; color:#4338CA; padding:3px 10px; border-radius:12px; font-size:0.78rem; font-weight:700;">{c_motos}</span>
-                    </div>
-                    <div style="font-size:0.88rem; color:#334155; line-height:1.7;">
-                        • <b>Hurtos Registrados:</b> <span style="color:#DC2626; font-weight:700;">{h_motos:,}</span> ({pct_motos:.1f}% del total municipal)<br>
-                        • <b>Recuperaciones:</b> <span style="color:#16A34A; font-weight:700;">{r_motos:,}</span><br>
-                        • <b>Tasa de Recuperación:</b> <span style="font-weight:800; color:{'#16A34A' if t_motos>=50 else '#DC2626'};">{t_motos:.1f}%</span><br>
-                        • <b>Dinámica Criminológica:</b> Desguace y receptación ilícita exprés (&lt;120 min), alteración de sistemas de identificación y comercialización clandestina de repuestos.
-                    </div>
-                </div>
-                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-top:4px solid #0EA5E9; border-radius:12px; padding:16px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <span style="font-weight:800; color:#082F49; font-size:1.05rem;">🚗 AUTOMOTORES</span>
-                        <span style="background:#F0F9FF; color:#0369A1; padding:3px 10px; border-radius:12px; font-size:0.78rem; font-weight:700;">{c_autos}</span>
-                    </div>
-                    <div style="font-size:0.88rem; color:#334155; line-height:1.7;">
-                        • <b>Hurtos Registrados:</b> <span style="color:#DC2626; font-weight:700;">{h_autos:,}</span> ({pct_autos:.1f}% del total municipal)<br>
-                        • <b>Recuperaciones:</b> <span style="color:#16A34A; font-weight:700;">{r_autos:,}</span><br>
-                        • <b>Tasa de Recuperación:</b> <span style="font-weight:800; color:{'#16A34A' if t_autos>=50 else '#DC2626'};">{min(t_autos, 100.0):.1f}%</span><br>
-                        • <b>Dinámica Criminológica:</b> Modalidad predominante de halado y gemeleo/clonación de placas; alta efectividad policial por trazabilidad GPS y arcos LPR.
-                    </div>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        render_tactical_comparison(
+            m_sel=m_sel,
+            c_motos=c_motos,
+            h_motos=f"{h_motos:,}",
+            pct_motos=f"{pct_motos:.1f}",
+            r_motos=f"{r_motos:,}",
+            t_motos=f"{t_motos:.1f}",
+            color_t_motos="#16A34A" if t_motos >= 50 else "#DC2626",
+            c_autos=c_autos,
+            h_autos=f"{h_autos:,}",
+            pct_autos=f"{pct_autos:.1f}",
+            r_autos=f"{r_autos:,}",
+            t_autos=f"{min(t_autos, 100.0):.1f}",
+            color_t_autos="#16A34A" if t_autos >= 50 else "#DC2626"
+        )
         
         # ── Visualizaciones Tácticas Interactivas ──
         col_g1, col_g2 = st.columns([1.5, 1])
@@ -741,54 +727,51 @@ elif "🔍 Ficha Táctica" in seccion:
                 rec_candado = "Activación del Plan Candado Metropolitano con bloqueo coordinado en los principales corredores intermunicipales de escape."
                 rec_talleres = "Allanamientos conjuntos SIJIN-Fiscalía a bodegas de autopartes ilegales y mercados clandestinos de receptación."
             
-            puntos_accion = f"""
-            • <b>Plan Candado Exprés (Ventana Dorada 15 min):</b> {rec_candado}<br>
-            • <b>Lucha contra el Desguace y Receptación:</b> {rec_talleres}<br>
-            • <b>Arcos de Fotodetección y Cámaras LPR:</b> Lectura automática de placas en los accesos urbanos para detectar motocicletas y automotores con reporte vigente en tiempo real.<br>
-            • <b>Patrullaje Preventivo Nocturno:</b> Disuasión activa en puntos críticos entre las 18:00 y las 04:00 horas frente a la modalidad de halado en parqueo informal.
-            """
+            puntos_html = (
+                f"<div style='margin-bottom:6px;'>• <b>Plan Candado Exprés (Ventana Dorada 15 min):</b> {rec_candado}</div>"
+                f"<div style='margin-bottom:6px;'>• <b>Lucha contra el Desguace y Receptación:</b> {rec_talleres}</div>"
+                "<div style='margin-bottom:6px;'>• <b>Arcos de Fotodetección y Cámaras LPR:</b> Lectura automática de placas en los accesos urbanos para detectar motocicletas y automotores con reporte vigente en tiempo real.</div>"
+                "<div style='margin-bottom:6px;'>• <b>Patrullaje Preventivo Nocturno:</b> Disuasión activa en puntos críticos entre las 18:00 y las 04:00 horas frente a la modalidad de halado en parqueo informal.</div>"
+            )
         elif "C1" in c_m or (h_m >= 200 and t_m >= 50):
             titulo_alerta = f"🟡 DICTAMEN TÁCTICO: CABECERA INTERMEDIA CON RIESGO ACTIVO Y ALTA RESPUESTA — {m_sel}"
             bg_alerta = "#FEFCE8"
             border_alerta = "#EAB308"
             color_tit_alerta = "#854D0E"
-            puntos_accion = f"""
-            • <b>Sostener la Tasa de Respuesta:</b> El municipio muestra una capacidad de recuperación destacada ({t_m:.1f}%), siendo referente operativo.<br>
-            • <b>Puestos de Control Viales Móviles:</b> Ubicar retenes en fines de semana y festivos sobre los corredores turísticos y de conexión intermunicipal.<br>
-            • <b>Campañas de Marcación Gratuita de Motos:</b> Promover la marcación profunda de chasis y piezas visibles para frenar el halado oportunista.<br>
-            • <b>Vigilancia Comunitaria:</b> Fortalecer frentes de seguridad local en sectores comerciales y de esparcimiento nocturno.
-            """
+            puntos_html = (
+                f"<div style='margin-bottom:6px;'>• <b>Sostener la Tasa de Respuesta:</b> El municipio muestra una capacidad de recuperación destacada ({t_m:.1f}%), siendo referente operativo.</div>"
+                "<div style='margin-bottom:6px;'>• <b>Puestos de Control Viales Móviles:</b> Ubicar retenes en fines de semana y festivos sobre los corredores turísticos y de conexión intermunicipal.</div>"
+                "<div style='margin-bottom:6px;'>• <b>Campañas de Marcación Gratuita de Motos:</b> Promover la marcación profunda de chasis y piezas visibles para frenar el halado oportunista.</div>"
+                "<div style='margin-bottom:6px;'>• <b>Vigilancia Comunitaria:</b> Fortalecer frentes de seguridad local en sectores comerciales y de esparcimiento nocturno.</div>"
+            )
         elif "C0" in c_m:
             titulo_alerta = f"🟢 DICTAMEN TÁCTICO: ZONA PACÍFICA / CONTROL PREVENTIVO COMUNITARIO — {m_sel}"
             bg_alerta = "#ECFDF5"
             border_alerta = "#10B981"
             color_tit_alerta = "#065F46"
-            puntos_accion = f"""
-            • <b>Bajo Nivel de Amenaza:</b> Registro delictivo marginal o nulo con alta tasa de efectividad preventiva ({t_m:.1f}%).<br>
-            • <b>Filtro de Tránsito Intermunicipal:</b> Evitar que el municipio sea utilizado como zona de enfriamiento o parqueadero de vehículos hurtados en ciudades capitales.<br>
-            • <b>Patrullaje Rural y Verificación de Antecedentes:</b> Consultas periódicas en el sistema SICOQ y RUNT a vehículos foráneos en ferias patronales o temporadas turísticas.
-            """
+            puntos_html = (
+                f"<div style='margin-bottom:6px;'>• <b>Bajo Nivel de Amenaza:</b> Registro delictivo marginal o nulo con alta tasa de efectividad preventiva ({t_m:.1f}%).</div>"
+                "<div style='margin-bottom:6px;'>• <b>Filtro de Tránsito Intermunicipal:</b> Evitar que el municipio sea utilizado como zona de enfriamiento o parqueadero de vehículos hurtados en ciudades capitales.</div>"
+                "<div style='margin-bottom:6px;'>• <b>Patrullaje Rural y Verificación de Antecedentes:</b> Consultas periódicas en el sistema SICOQ y RUNT a vehículos foráneos en ferias patronales o temporadas turísticas.</div>"
+            )
         else:
             titulo_alerta = f"🟠 DICTAMEN TÁCTICO: MONITOREO Y FISCALIZACIÓN DE REGISTROS — {m_sel}"
             bg_alerta = "#FFF7ED"
             border_alerta = "#F97316"
             color_tit_alerta = "#9A3412"
-            puntos_accion = f"""
-            • <b>Zona con Alta Matrícula Vehicular:</b> Parque automotor considerable respecto a la incidencia delictiva directa.<br>
-            • <b>Auditoría y Trazabilidad RUNT:</b> Fiscalizar los procesos de matrícula y traspaso para evitar trámites fraudulentos o gemeleo administrativo.<br>
-            • <b>Monitoreo Tecnológico:</b> Instalación de GPS obligatorio en vehículos comerciales y de servicio público.
-            """
+            puntos_html = (
+                "<div style='margin-bottom:6px;'>• <b>Zona con Alta Matrícula Vehicular:</b> Parque automotor considerable respecto a la incidencia delictiva directa.</div>"
+                "<div style='margin-bottom:6px;'>• <b>Auditoría y Trazabilidad RUNT:</b> Fiscalizar los procesos de matrícula y traspaso para evitar trámites fraudulentos o gemeleo administrativo.</div>"
+                "<div style='margin-bottom:6px;'>• <b>Monitoreo Tecnológico:</b> Instalación de GPS obligatorio en vehículos comerciales y de servicio público.</div>"
+            )
 
-        st.markdown(f"""
-        <div style="background:{bg_alerta}; border:1px solid {border_alerta}; border-left:6px solid {border_alerta}; border-radius:14px; padding:20px; margin-bottom:20px;">
-            <div style="font-size:1.05rem; font-weight:800; color:{color_tit_alerta}; margin-bottom:8px;">
-                {titulo_alerta}
-            </div>
-            <div style="font-size:0.88rem; color:#1E293B; line-height:1.7;">
-                {puntos_accion}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        render_tactical_alert(
+            bg_alerta=bg_alerta,
+            border_alerta=border_alerta,
+            color_tit_alerta=color_tit_alerta,
+            titulo_alerta=titulo_alerta,
+            puntos_html=puntos_html
+        )
 
         # ── Historial Cronológico y Exportación ──
         st.markdown("<div class='section-card'>", unsafe_allow_html=True)
