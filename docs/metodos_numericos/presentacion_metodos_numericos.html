@@ -146,6 +146,9 @@
   .chip-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
   .chip-btn.active.orange{background:var(--accent-orange);border-color:var(--accent-orange)}
   
+  .axis-guide-badge{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:8px 14px;margin-bottom:12px;font-size:.82rem;display:flex;gap:16px;flex-wrap:wrap;color:#1e3a8a;line-height:1.4}
+  .axis-guide-badge.orange{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+
   .canvas-stage{position:relative;width:100%;height:330px;background:#ffffff;border-radius:10px;border:1px solid var(--border);overflow:hidden;cursor:crosshair}
   canvas{display:block;width:100%;height:100%}
 
@@ -299,6 +302,11 @@
           </div>
         </div>
 
+        <div class="axis-guide-badge">
+          <span>📋 <strong>EJE X (Variable Independiente):</strong> Vehículos Hurtados Anuales (Denuncias Oficiales)</span>
+          <span>🛡️ <strong>EJE Y (Variable Dependiente):</strong> Vehículos Recuperados Anuales (Operatividad Policial DIJIN)</span>
+        </div>
+
         <div class="canvas-stage" id="stage-rl">
           <canvas id="cv-rl"></canvas>
           <div class="chart-tooltip" id="tip-rl"></div>
@@ -330,6 +338,11 @@
           </div>
         </div>
 
+        <div class="axis-guide-badge orange">
+          <span>📋 <strong>EJE X (Variable Independiente):</strong> Vehículos Hurtados Anuales (Nodos x₀, x₁, x₂, x₃)</span>
+          <span>🛡️ <strong>EJE Y (Variable Dependiente):</strong> Vehículos Recuperados Anuales (Valores Nodales y₀, y₁, y₂, y₃)</span>
+        </div>
+
         <div class="canvas-stage" id="stage-lag">
           <canvas id="cv-lag"></canvas>
           <div class="chart-tooltip" id="tip-lag"></div>
@@ -356,6 +369,12 @@
           </div>
           <div style="font-size:.75rem;color:var(--text-muted)">Ambos modelos proyectados en la misma escala</div>
         </div>
+
+        <div class="axis-guide-badge">
+          <span>📋 <strong>EJE X:</strong> Vehículos Hurtados Anuales (Rango 10,243 – 24,725)</span>
+          <span>🛡️ <strong>EJE Y:</strong> Vehículos Recuperados (Línea Azul MCO vs Curva Naranja Lagrange)</span>
+        </div>
+
         <div class="canvas-stage" id="stage-cmp">
           <canvas id="cv-cmp"></canvas>
           <div class="chart-tooltip" id="tip-cmp"></div>
@@ -932,7 +951,7 @@ function initStage(id) {
 // Gráfica 1: Regresión Lineal
 function drawRLChart(hoverPt = null) {
   const { ctx, w, h } = initStage('cv-rl');
-  const pad = { l: 65, r: 25, t: 25, b: 45 };
+  const pad = { l: 75, r: 25, t: 25, b: 54 };
   const pW = w - pad.l - pad.r;
   const pH = h - pad.t - pad.b;
 
@@ -962,11 +981,27 @@ function drawRLChart(hoverPt = null) {
   }
 
   // Ejes
-  ctx.strokeStyle = '#cbd5e1';
+  ctx.strokeStyle = '#94a3b8';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, h - pad.b); ctx.lineTo(w - pad.r, h - pad.b);
   ctx.stroke();
+
+  // Título explicativo Eje X
+  ctx.fillStyle = '#1e3a8a';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('➔ EJE X (Variable Independiente): Vehículos Hurtados Anuales (x)', pad.l + pW / 2, h - 8);
+
+  // Título explicativo Eje Y
+  ctx.save();
+  ctx.translate(18, pad.t + pH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = '#1e3a8a';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('➔ EJE Y (Variable Dependiente): Vehículos Recuperados (y)', 0, 0);
+  ctx.restore();
 
   // Residuos
   if (showRLRes) {
@@ -1051,7 +1086,7 @@ function drawRLChart(hoverPt = null) {
 // Gráfica 2: Lagrange
 function drawLagChart(hoverPt = null) {
   const { ctx, w, h } = initStage('cv-lag');
-  const pad = { l: 65, r: 25, t: 25, b: 45 };
+  const pad = { l: 75, r: 25, t: 25, b: 54 };
   const pW = w - pad.l - pad.r;
   const pH = h - pad.t - pad.b;
 
@@ -1081,11 +1116,27 @@ function drawLagChart(hoverPt = null) {
   }
 
   // Ejes
-  ctx.strokeStyle = '#cbd5e1';
+  ctx.strokeStyle = '#94a3b8';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, h - pad.b); ctx.lineTo(w - pad.r, h - pad.b);
   ctx.stroke();
+
+  // Título explicativo Eje X
+  ctx.fillStyle = '#9a3412';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('➔ EJE X (Variable Independiente): Vehículos Hurtados Anuales (x)', pad.l + pW / 2, h - 8);
+
+  // Título explicativo Eje Y
+  ctx.save();
+  ctx.translate(18, pad.t + pH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = '#9a3412';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('➔ EJE Y (Variable Dependiente): Vehículos Recuperados (y)', 0, 0);
+  ctx.restore();
 
   // Curva Lagrange
   if (showLagCv) {
@@ -1181,7 +1232,7 @@ function drawLagChart(hoverPt = null) {
 // Gráfica 3: Comparación Directa
 function drawCmpChart(hoverPt = null) {
   const { ctx, w, h } = initStage('cv-cmp');
-  const pad = { l: 65, r: 25, t: 25, b: 45 };
+  const pad = { l: 75, r: 25, t: 25, b: 54 };
   const pW = w - pad.l - pad.r;
   const pH = h - pad.t - pad.b;
 
@@ -1211,11 +1262,27 @@ function drawCmpChart(hoverPt = null) {
   }
 
   // Ejes
-  ctx.strokeStyle = '#cbd5e1';
+  ctx.strokeStyle = '#94a3b8';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, h - pad.b); ctx.lineTo(w - pad.r, h - pad.b);
   ctx.stroke();
+
+  // Título explicativo Eje X
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('➔ EJE X (Variable Independiente): Vehículos Hurtados Anuales (x)', pad.l + pW / 2, h - 8);
+
+  // Título explicativo Eje Y
+  ctx.save();
+  ctx.translate(18, pad.t + pH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('➔ EJE Y (Variable Dependiente): Vehículos Recuperados (y)', 0, 0);
+  ctx.restore();
 
   // Curva Lagrange
   ctx.strokeStyle = '#f97316';

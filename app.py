@@ -305,9 +305,11 @@ if "📊 Diagnóstico" in seccion:
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
             hovermode="x unified",
+            xaxis_title="<b>Eje X:</b> Año Calendario (Línea de Tiempo Histórica)",
+            yaxis_title="<b>Eje Y:</b> Total de Vehículos (Casos Registrados)",
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             margin=dict(l=10, r=10, t=10, b=10),
-            height=320
+            height=340
         )
         st.plotly_chart(fig_l, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
@@ -346,16 +348,18 @@ if "📊 Diagnóstico" in seccion:
         df_top, x="VEHICULOS_HURTADOS", y="MUNICIPIO",
         orientation="h", color="TASA_REC",
         color_continuous_scale=["#F43F5E", "#FBBF24", "#10B981"],
-        labels={"VEHICULOS_HURTADOS": "Hurtos Totales", "TASA_REC": "Tasa Recuperación (%)"},
+        labels={"VEHICULOS_HURTADOS": "Eje X: Hurtos Totales", "TASA_REC": "Tasa Recuperación (%)", "MUNICIPIO": "Eje Y: Ciudad"},
         text="VEHICULOS_HURTADOS"
     )
     fig_bar.update_layout(
         yaxis=dict(autorange="reversed"),
+        xaxis_title="<b>Eje X:</b> Total de Vehículos Hurtados (Casos Anuales)",
+        yaxis_title="<b>Eje Y:</b> Municipio / Ciudad",
         template="plotly_white",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=10, r=10, t=10, b=10),
-        height=320
+        height=330
     )
     st.plotly_chart(fig_bar, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -514,14 +518,21 @@ elif "🎯 Segmentación" in seccion:
             "🔴 C2: FOCO CRÍTICO": "#F43F5E",
             "🟠 C3: Parque Grande / Bajo Hurto": "#0EA5E9"
         },
-        labels={"VEHICULOS_HURTADOS": "Hurtos", "VEHICULOS_RECUPERADOS": "Recuperaciones"}
+        labels={
+            "VEHICULOS_HURTADOS": "Eje X: Vehículos Hurtados (Incidencia Delictiva)",
+            "VEHICULOS_RECUPERADOS": "Eje Y: Vehículos Recuperados (Efectividad Policial)",
+            "CLUSTER_NOMBRE": "Clúster / Segmento",
+            "VEHICULOS_REGISTRADOS": "Parque Automotor Registrado"
+        }
     )
     fig_scat.update_layout(
         template="plotly_white",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
+        xaxis_title="<b>Eje X (Causa):</b> Vehículos Hurtados Anuales (Incidencia Criminal)",
+        yaxis_title="<b>Eje Y (Efecto):</b> Vehículos Recuperados Anuales (Operatividad Policial)",
         margin=dict(l=10, r=10, t=10, b=10),
-        height=380
+        height=400
     )
     st.plotly_chart(fig_scat, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
